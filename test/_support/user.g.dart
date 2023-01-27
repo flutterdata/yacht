@@ -7,7 +7,7 @@ part of 'user.dart';
 // **************************************************************************
 
 abstract class _$UserCWProxy {
-  User id(int id);
+  User id(String? id);
 
   User name(String? name);
 
@@ -20,7 +20,7 @@ abstract class _$UserCWProxy {
   /// User(...).copyWith(id: 12, name: "My name")
   /// ````
   User call({
-    int? id,
+    String? id,
     String? name,
     int? age,
   });
@@ -33,7 +33,7 @@ class _$UserCWProxyImpl implements _$UserCWProxy {
   final User _value;
 
   @override
-  User id(int id) => this(id: id);
+  User id(String? id) => this(id: id);
 
   @override
   User name(String? name) => this(name: name);
@@ -55,11 +55,10 @@ class _$UserCWProxyImpl implements _$UserCWProxy {
     Object? age = const $CopyWithPlaceholder(),
   }) {
     return User(
-      id: id == const $CopyWithPlaceholder() || id == null
-          // ignore: unnecessary_non_null_assertion
-          ? _value.id!
+      id: id == const $CopyWithPlaceholder()
+          ? _value.id
           // ignore: cast_nullable_to_non_nullable
-          : id as int,
+          : id as String?,
       name: name == const $CopyWithPlaceholder()
           ? _value.name
           // ignore: cast_nullable_to_non_nullable
@@ -102,20 +101,45 @@ const UserSchema = CollectionSchema(
       id: 1,
       name: r'firstName',
       type: IsarType.string,
+    ),
+    r'id': PropertySchema(
+      id: 2,
+      name: r'id',
+      type: IsarType.string,
     )
   },
   estimateSize: _userEstimateSize,
   serialize: _userSerialize,
   deserialize: _userDeserialize,
   deserializeProp: _userDeserializeProp,
-  idName: r'id',
-  indexes: {},
+  idName: r'internalKey',
+  indexes: {
+    r'id': IndexSchema(
+      id: -3268401673993471357,
+      name: r'id',
+      unique: false,
+      replace: false,
+      properties: [
+        IndexPropertySchema(
+          name: r'id',
+          type: IndexType.hash,
+          caseSensitive: true,
+        )
+      ],
+    )
+  },
   links: {
-    r'city': LinkSchema(
-      id: -3498806507041215862,
-      name: r'city',
+    r'hometown': LinkSchema(
+      id: -6460337970129397196,
+      name: r'hometown',
       target: r'City',
       single: true,
+    ),
+    r'bucketList': LinkSchema(
+      id: -5792051816250112667,
+      name: r'bucketList',
+      target: r'City',
+      single: false,
     )
   },
   embeddedSchemas: {},
@@ -137,6 +161,12 @@ int _userEstimateSize(
       bytesCount += 3 + value.length * 3;
     }
   }
+  {
+    final value = object.id;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   return bytesCount;
 }
 
@@ -148,6 +178,7 @@ void _userSerialize(
 ) {
   writer.writeLong(offsets[0], object.age);
   writer.writeString(offsets[1], object.name);
+  writer.writeString(offsets[2], object.id);
 }
 
 User _userDeserialize(
@@ -159,7 +190,7 @@ User _userDeserialize(
   final object = User(
     age: reader.readLongOrNull(offsets[0]),
     name: reader.readStringOrNull(offsets[1]),
-    id: id,
+    id: reader.readStringOrNull(offsets[2]),
   );
   return object;
 }
@@ -175,26 +206,28 @@ P _userDeserializeProp<P>(
       return (reader.readLongOrNull(offset)) as P;
     case 1:
       return (reader.readStringOrNull(offset)) as P;
+    case 2:
+      return (reader.readStringOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
 }
 
 Id _userGetId(User object) {
-  return object.id;
+  return object.internalKey;
 }
 
 List<IsarLinkBase<dynamic>> _userGetLinks(User object) {
-  return [object.city];
+  return [object.hometown, object.bucketList];
 }
 
 void _userAttach(IsarCollection<dynamic> col, Id id, User object) {
-  object.id = id;
-  object.city.attach(col, col.isar.collection<City>(), r'city', id);
+  object.hometown.attach(col, col.isar.collection<City>(), r'hometown', id);
+  object.bucketList.attach(col, col.isar.collection<City>(), r'bucketList', id);
 }
 
 extension UserQueryWhereSort on QueryBuilder<User, User, QWhere> {
-  QueryBuilder<User, User, QAfterWhere> anyId() {
+  QueryBuilder<User, User, QAfterWhere> anyInternalKey() {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(const IdWhereClause.any());
     });
@@ -202,68 +235,137 @@ extension UserQueryWhereSort on QueryBuilder<User, User, QWhere> {
 }
 
 extension UserQueryWhere on QueryBuilder<User, User, QWhereClause> {
-  QueryBuilder<User, User, QAfterWhereClause> idEqualTo(Id id) {
+  QueryBuilder<User, User, QAfterWhereClause> internalKeyEqualTo(
+      Id internalKey) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IdWhereClause.between(
-        lower: id,
-        upper: id,
+        lower: internalKey,
+        upper: internalKey,
       ));
     });
   }
 
-  QueryBuilder<User, User, QAfterWhereClause> idNotEqualTo(Id id) {
+  QueryBuilder<User, User, QAfterWhereClause> internalKeyNotEqualTo(
+      Id internalKey) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
         return query
             .addWhereClause(
-              IdWhereClause.lessThan(upper: id, includeUpper: false),
+              IdWhereClause.lessThan(upper: internalKey, includeUpper: false),
             )
             .addWhereClause(
-              IdWhereClause.greaterThan(lower: id, includeLower: false),
+              IdWhereClause.greaterThan(
+                  lower: internalKey, includeLower: false),
             );
       } else {
         return query
             .addWhereClause(
-              IdWhereClause.greaterThan(lower: id, includeLower: false),
+              IdWhereClause.greaterThan(
+                  lower: internalKey, includeLower: false),
             )
             .addWhereClause(
-              IdWhereClause.lessThan(upper: id, includeUpper: false),
+              IdWhereClause.lessThan(upper: internalKey, includeUpper: false),
             );
       }
     });
   }
 
-  QueryBuilder<User, User, QAfterWhereClause> idGreaterThan(Id id,
+  QueryBuilder<User, User, QAfterWhereClause> internalKeyGreaterThan(
+      Id internalKey,
       {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
-        IdWhereClause.greaterThan(lower: id, includeLower: include),
+        IdWhereClause.greaterThan(lower: internalKey, includeLower: include),
       );
     });
   }
 
-  QueryBuilder<User, User, QAfterWhereClause> idLessThan(Id id,
+  QueryBuilder<User, User, QAfterWhereClause> internalKeyLessThan(
+      Id internalKey,
       {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
-        IdWhereClause.lessThan(upper: id, includeUpper: include),
+        IdWhereClause.lessThan(upper: internalKey, includeUpper: include),
       );
     });
   }
 
-  QueryBuilder<User, User, QAfterWhereClause> idBetween(
-    Id lowerId,
-    Id upperId, {
+  QueryBuilder<User, User, QAfterWhereClause> internalKeyBetween(
+    Id lowerInternalKey,
+    Id upperInternalKey, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IdWhereClause.between(
-        lower: lowerId,
+        lower: lowerInternalKey,
         includeLower: includeLower,
-        upper: upperId,
+        upper: upperInternalKey,
         includeUpper: includeUpper,
       ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterWhereClause> idIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'id',
+        value: [null],
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterWhereClause> idIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'id',
+        lower: [null],
+        includeLower: false,
+        upper: [],
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterWhereClause> idEqualTo(String? id) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'id',
+        value: [id],
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterWhereClause> idNotEqualTo(String? id) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'id',
+              lower: [],
+              upper: [id],
+              includeUpper: false,
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'id',
+              lower: [id],
+              includeLower: false,
+              upper: [],
+            ));
+      } else {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'id',
+              lower: [id],
+              includeLower: false,
+              upper: [],
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'id',
+              lower: [],
+              upper: [id],
+              includeUpper: false,
+            ));
+      }
     });
   }
 }
@@ -481,42 +583,186 @@ extension UserQueryFilter on QueryBuilder<User, User, QFilterCondition> {
     });
   }
 
-  QueryBuilder<User, User, QAfterFilterCondition> idEqualTo(Id value) {
+  QueryBuilder<User, User, QAfterFilterCondition> idIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'id',
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> idIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'id',
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> idEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'id',
         value: value,
+        caseSensitive: caseSensitive,
       ));
     });
   }
 
   QueryBuilder<User, User, QAfterFilterCondition> idGreaterThan(
-    Id value, {
+    String? value, {
     bool include = false,
+    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
         property: r'id',
         value: value,
+        caseSensitive: caseSensitive,
       ));
     });
   }
 
   QueryBuilder<User, User, QAfterFilterCondition> idLessThan(
-    Id value, {
+    String? value, {
     bool include = false,
+    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
         property: r'id',
         value: value,
+        caseSensitive: caseSensitive,
       ));
     });
   }
 
   QueryBuilder<User, User, QAfterFilterCondition> idBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'id',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> idStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'id',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> idEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'id',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> idContains(String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'id',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> idMatches(String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'id',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> idIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'id',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> idIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'id',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> internalKeyEqualTo(Id value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'internalKey',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> internalKeyGreaterThan(
+    Id value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'internalKey',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> internalKeyLessThan(
+    Id value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'internalKey',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> internalKeyBetween(
     Id lower,
     Id upper, {
     bool includeLower = true,
@@ -524,7 +770,7 @@ extension UserQueryFilter on QueryBuilder<User, User, QFilterCondition> {
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r'id',
+        property: r'internalKey',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -537,15 +783,72 @@ extension UserQueryFilter on QueryBuilder<User, User, QFilterCondition> {
 extension UserQueryObject on QueryBuilder<User, User, QFilterCondition> {}
 
 extension UserQueryLinks on QueryBuilder<User, User, QFilterCondition> {
-  QueryBuilder<User, User, QAfterFilterCondition> city(FilterQuery<City> q) {
+  QueryBuilder<User, User, QAfterFilterCondition> hometown(
+      FilterQuery<City> q) {
     return QueryBuilder.apply(this, (query) {
-      return query.link(q, r'city');
+      return query.link(q, r'hometown');
     });
   }
 
-  QueryBuilder<User, User, QAfterFilterCondition> cityIsNull() {
+  QueryBuilder<User, User, QAfterFilterCondition> hometownIsNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'city', 0, true, 0, true);
+      return query.linkLength(r'hometown', 0, true, 0, true);
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> bucketList(
+      FilterQuery<City> q) {
+    return QueryBuilder.apply(this, (query) {
+      return query.link(q, r'bucketList');
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> bucketListLengthEqualTo(
+      int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(r'bucketList', length, true, length, true);
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> bucketListIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(r'bucketList', 0, true, 0, true);
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> bucketListIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(r'bucketList', 0, false, 999999, true);
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> bucketListLengthLessThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(r'bucketList', 0, true, length, include);
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> bucketListLengthGreaterThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(r'bucketList', length, include, 999999, true);
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> bucketListLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(
+          r'bucketList', lower, includeLower, upper, includeUpper);
     });
   }
 }
@@ -572,6 +875,18 @@ extension UserQuerySortBy on QueryBuilder<User, User, QSortBy> {
   QueryBuilder<User, User, QAfterSortBy> sortByNameDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'firstName', Sort.desc);
+    });
+  }
+
+  QueryBuilder<User, User, QAfterSortBy> sortById() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'id', Sort.asc);
+    });
+  }
+
+  QueryBuilder<User, User, QAfterSortBy> sortByIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'id', Sort.desc);
     });
   }
 }
@@ -612,6 +927,18 @@ extension UserQuerySortThenBy on QueryBuilder<User, User, QSortThenBy> {
       return query.addSortBy(r'id', Sort.desc);
     });
   }
+
+  QueryBuilder<User, User, QAfterSortBy> thenByInternalKey() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'internalKey', Sort.asc);
+    });
+  }
+
+  QueryBuilder<User, User, QAfterSortBy> thenByInternalKeyDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'internalKey', Sort.desc);
+    });
+  }
 }
 
 extension UserQueryWhereDistinct on QueryBuilder<User, User, QDistinct> {
@@ -627,12 +954,19 @@ extension UserQueryWhereDistinct on QueryBuilder<User, User, QDistinct> {
       return query.addDistinctBy(r'firstName', caseSensitive: caseSensitive);
     });
   }
+
+  QueryBuilder<User, User, QDistinct> distinctById(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'id', caseSensitive: caseSensitive);
+    });
+  }
 }
 
 extension UserQueryProperty on QueryBuilder<User, User, QQueryProperty> {
-  QueryBuilder<User, int, QQueryOperations> idProperty() {
+  QueryBuilder<User, int, QQueryOperations> internalKeyProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'id');
+      return query.addPropertyName(r'internalKey');
     });
   }
 
@@ -645,6 +979,12 @@ extension UserQueryProperty on QueryBuilder<User, User, QQueryProperty> {
   QueryBuilder<User, String?, QQueryOperations> nameProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'firstName');
+    });
+  }
+
+  QueryBuilder<User, String?, QQueryOperations> idProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'id');
     });
   }
 }

@@ -7,11 +7,12 @@ part 'city.g.dart';
 @collection
 @CopyWith()
 class City with DataModel<City> {
+  @Index()
   @override
-  Id id;
+  final String id;
 
   final String? name;
   final int? population;
 
-  City({this.id = Isar.autoIncrement, this.name, this.population});
+  City({required this.id, this.name, this.population});
 }

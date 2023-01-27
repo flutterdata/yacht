@@ -7,7 +7,7 @@ part of 'city.dart';
 // **************************************************************************
 
 abstract class _$CityCWProxy {
-  City id(int id);
+  City id(String id);
 
   City name(String? name);
 
@@ -20,7 +20,7 @@ abstract class _$CityCWProxy {
   /// City(...).copyWith(id: 12, name: "My name")
   /// ````
   City call({
-    int? id,
+    String? id,
     String? name,
     int? population,
   });
@@ -33,7 +33,7 @@ class _$CityCWProxyImpl implements _$CityCWProxy {
   final City _value;
 
   @override
-  City id(int id) => this(id: id);
+  City id(String id) => this(id: id);
 
   @override
   City name(String? name) => this(name: name);
@@ -59,7 +59,7 @@ class _$CityCWProxyImpl implements _$CityCWProxy {
           // ignore: unnecessary_non_null_assertion
           ? _value.id!
           // ignore: cast_nullable_to_non_nullable
-          : id as int,
+          : id as String,
       name: name == const $CopyWithPlaceholder()
           ? _value.name
           // ignore: cast_nullable_to_non_nullable
@@ -93,13 +93,18 @@ const CitySchema = CollectionSchema(
   name: r'City',
   id: 7924339642267295226,
   properties: {
-    r'name': PropertySchema(
+    r'id': PropertySchema(
       id: 0,
+      name: r'id',
+      type: IsarType.string,
+    ),
+    r'name': PropertySchema(
+      id: 1,
       name: r'name',
       type: IsarType.string,
     ),
     r'population': PropertySchema(
-      id: 1,
+      id: 2,
       name: r'population',
       type: IsarType.long,
     )
@@ -108,8 +113,22 @@ const CitySchema = CollectionSchema(
   serialize: _citySerialize,
   deserialize: _cityDeserialize,
   deserializeProp: _cityDeserializeProp,
-  idName: r'id',
-  indexes: {},
+  idName: r'internalKey',
+  indexes: {
+    r'id': IndexSchema(
+      id: -3268401673993471357,
+      name: r'id',
+      unique: false,
+      replace: false,
+      properties: [
+        IndexPropertySchema(
+          name: r'id',
+          type: IndexType.hash,
+          caseSensitive: true,
+        )
+      ],
+    )
+  },
   links: {},
   embeddedSchemas: {},
   getId: _cityGetId,
@@ -124,6 +143,7 @@ int _cityEstimateSize(
   Map<Type, List<int>> allOffsets,
 ) {
   var bytesCount = offsets.last;
+  bytesCount += 3 + object.id.length * 3;
   {
     final value = object.name;
     if (value != null) {
@@ -139,8 +159,9 @@ void _citySerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeString(offsets[0], object.name);
-  writer.writeLong(offsets[1], object.population);
+  writer.writeString(offsets[0], object.id);
+  writer.writeString(offsets[1], object.name);
+  writer.writeLong(offsets[2], object.population);
 }
 
 City _cityDeserialize(
@@ -150,9 +171,9 @@ City _cityDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = City(
-    id: id,
-    name: reader.readStringOrNull(offsets[0]),
-    population: reader.readLongOrNull(offsets[1]),
+    id: reader.readString(offsets[0]),
+    name: reader.readStringOrNull(offsets[1]),
+    population: reader.readLongOrNull(offsets[2]),
   );
   return object;
 }
@@ -165,8 +186,10 @@ P _cityDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 1:
+      return (reader.readStringOrNull(offset)) as P;
+    case 2:
       return (reader.readLongOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -174,19 +197,17 @@ P _cityDeserializeProp<P>(
 }
 
 Id _cityGetId(City object) {
-  return object.id;
+  return object.internalKey;
 }
 
 List<IsarLinkBase<dynamic>> _cityGetLinks(City object) {
   return [];
 }
 
-void _cityAttach(IsarCollection<dynamic> col, Id id, City object) {
-  object.id = id;
-}
+void _cityAttach(IsarCollection<dynamic> col, Id id, City object) {}
 
 extension CityQueryWhereSort on QueryBuilder<City, City, QWhere> {
-  QueryBuilder<City, City, QAfterWhere> anyId() {
+  QueryBuilder<City, City, QAfterWhere> anyInternalKey() {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(const IdWhereClause.any());
     });
@@ -194,109 +215,286 @@ extension CityQueryWhereSort on QueryBuilder<City, City, QWhere> {
 }
 
 extension CityQueryWhere on QueryBuilder<City, City, QWhereClause> {
-  QueryBuilder<City, City, QAfterWhereClause> idEqualTo(Id id) {
+  QueryBuilder<City, City, QAfterWhereClause> internalKeyEqualTo(
+      Id internalKey) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IdWhereClause.between(
-        lower: id,
-        upper: id,
+        lower: internalKey,
+        upper: internalKey,
       ));
     });
   }
 
-  QueryBuilder<City, City, QAfterWhereClause> idNotEqualTo(Id id) {
+  QueryBuilder<City, City, QAfterWhereClause> internalKeyNotEqualTo(
+      Id internalKey) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
         return query
             .addWhereClause(
-              IdWhereClause.lessThan(upper: id, includeUpper: false),
+              IdWhereClause.lessThan(upper: internalKey, includeUpper: false),
             )
             .addWhereClause(
-              IdWhereClause.greaterThan(lower: id, includeLower: false),
+              IdWhereClause.greaterThan(
+                  lower: internalKey, includeLower: false),
             );
       } else {
         return query
             .addWhereClause(
-              IdWhereClause.greaterThan(lower: id, includeLower: false),
+              IdWhereClause.greaterThan(
+                  lower: internalKey, includeLower: false),
             )
             .addWhereClause(
-              IdWhereClause.lessThan(upper: id, includeUpper: false),
+              IdWhereClause.lessThan(upper: internalKey, includeUpper: false),
             );
       }
     });
   }
 
-  QueryBuilder<City, City, QAfterWhereClause> idGreaterThan(Id id,
+  QueryBuilder<City, City, QAfterWhereClause> internalKeyGreaterThan(
+      Id internalKey,
       {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
-        IdWhereClause.greaterThan(lower: id, includeLower: include),
+        IdWhereClause.greaterThan(lower: internalKey, includeLower: include),
       );
     });
   }
 
-  QueryBuilder<City, City, QAfterWhereClause> idLessThan(Id id,
+  QueryBuilder<City, City, QAfterWhereClause> internalKeyLessThan(
+      Id internalKey,
       {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
-        IdWhereClause.lessThan(upper: id, includeUpper: include),
+        IdWhereClause.lessThan(upper: internalKey, includeUpper: include),
       );
     });
   }
 
-  QueryBuilder<City, City, QAfterWhereClause> idBetween(
-    Id lowerId,
-    Id upperId, {
+  QueryBuilder<City, City, QAfterWhereClause> internalKeyBetween(
+    Id lowerInternalKey,
+    Id upperInternalKey, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IdWhereClause.between(
-        lower: lowerId,
+        lower: lowerInternalKey,
         includeLower: includeLower,
-        upper: upperId,
+        upper: upperInternalKey,
         includeUpper: includeUpper,
       ));
+    });
+  }
+
+  QueryBuilder<City, City, QAfterWhereClause> idEqualTo(String id) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'id',
+        value: [id],
+      ));
+    });
+  }
+
+  QueryBuilder<City, City, QAfterWhereClause> idNotEqualTo(String id) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'id',
+              lower: [],
+              upper: [id],
+              includeUpper: false,
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'id',
+              lower: [id],
+              includeLower: false,
+              upper: [],
+            ));
+      } else {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'id',
+              lower: [id],
+              includeLower: false,
+              upper: [],
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'id',
+              lower: [],
+              upper: [id],
+              includeUpper: false,
+            ));
+      }
     });
   }
 }
 
 extension CityQueryFilter on QueryBuilder<City, City, QFilterCondition> {
-  QueryBuilder<City, City, QAfterFilterCondition> idEqualTo(Id value) {
+  QueryBuilder<City, City, QAfterFilterCondition> idEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'id',
         value: value,
+        caseSensitive: caseSensitive,
       ));
     });
   }
 
   QueryBuilder<City, City, QAfterFilterCondition> idGreaterThan(
-    Id value, {
+    String value, {
     bool include = false,
+    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
         property: r'id',
         value: value,
+        caseSensitive: caseSensitive,
       ));
     });
   }
 
   QueryBuilder<City, City, QAfterFilterCondition> idLessThan(
-    Id value, {
+    String value, {
     bool include = false,
+    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
         property: r'id',
         value: value,
+        caseSensitive: caseSensitive,
       ));
     });
   }
 
   QueryBuilder<City, City, QAfterFilterCondition> idBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'id',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<City, City, QAfterFilterCondition> idStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'id',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<City, City, QAfterFilterCondition> idEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'id',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<City, City, QAfterFilterCondition> idContains(String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'id',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<City, City, QAfterFilterCondition> idMatches(String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'id',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<City, City, QAfterFilterCondition> idIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'id',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<City, City, QAfterFilterCondition> idIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'id',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<City, City, QAfterFilterCondition> internalKeyEqualTo(Id value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'internalKey',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<City, City, QAfterFilterCondition> internalKeyGreaterThan(
+    Id value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'internalKey',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<City, City, QAfterFilterCondition> internalKeyLessThan(
+    Id value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'internalKey',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<City, City, QAfterFilterCondition> internalKeyBetween(
     Id lower,
     Id upper, {
     bool includeLower = true,
@@ -304,7 +502,7 @@ extension CityQueryFilter on QueryBuilder<City, City, QFilterCondition> {
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r'id',
+        property: r'internalKey',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -532,6 +730,18 @@ extension CityQueryObject on QueryBuilder<City, City, QFilterCondition> {}
 extension CityQueryLinks on QueryBuilder<City, City, QFilterCondition> {}
 
 extension CityQuerySortBy on QueryBuilder<City, City, QSortBy> {
+  QueryBuilder<City, City, QAfterSortBy> sortById() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'id', Sort.asc);
+    });
+  }
+
+  QueryBuilder<City, City, QAfterSortBy> sortByIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'id', Sort.desc);
+    });
+  }
+
   QueryBuilder<City, City, QAfterSortBy> sortByName() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'name', Sort.asc);
@@ -570,6 +780,18 @@ extension CityQuerySortThenBy on QueryBuilder<City, City, QSortThenBy> {
     });
   }
 
+  QueryBuilder<City, City, QAfterSortBy> thenByInternalKey() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'internalKey', Sort.asc);
+    });
+  }
+
+  QueryBuilder<City, City, QAfterSortBy> thenByInternalKeyDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'internalKey', Sort.desc);
+    });
+  }
+
   QueryBuilder<City, City, QAfterSortBy> thenByName() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'name', Sort.asc);
@@ -596,6 +818,13 @@ extension CityQuerySortThenBy on QueryBuilder<City, City, QSortThenBy> {
 }
 
 extension CityQueryWhereDistinct on QueryBuilder<City, City, QDistinct> {
+  QueryBuilder<City, City, QDistinct> distinctById(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'id', caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<City, City, QDistinct> distinctByName(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -611,7 +840,13 @@ extension CityQueryWhereDistinct on QueryBuilder<City, City, QDistinct> {
 }
 
 extension CityQueryProperty on QueryBuilder<City, City, QQueryProperty> {
-  QueryBuilder<City, int, QQueryOperations> idProperty() {
+  QueryBuilder<City, int, QQueryOperations> internalKeyProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'internalKey');
+    });
+  }
+
+  QueryBuilder<City, String, QQueryOperations> idProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'id');
     });

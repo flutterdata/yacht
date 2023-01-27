@@ -9,14 +9,22 @@ part 'user.g.dart';
 @collection
 @CopyWith()
 class User with DataModel<User> {
+  @Index()
   @override
-  Id id;
+  final String? id;
 
   @Name("firstName")
   final String? name;
   final int? age;
 
-  final city = IsarLink<City>();
+  // relationships
+  final hometown = IsarLink<City>();
+  final bucketList = IsarLinks<City>();
 
-  User({this.id = Isar.autoIncrement, this.name, this.age});
+  User({this.id, this.name, this.age});
+
+  @override
+  String toString() {
+    return 'User $id [$internalKey] ($name ($age))';
+  }
 }
