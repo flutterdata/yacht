@@ -1,8 +1,4 @@
-/// Support for doing something awesome.
-///
-/// More dartdocs go here.
-library yacht;
-
-export 'src/yacht_base.dart';
-
-// TODO: Export any libraries intended for clients of this package.
+export 'src/common.dart';
+export 'src/data_model.dart';
+export 'src/notifier.dart';
+export 'src/repository.dart';

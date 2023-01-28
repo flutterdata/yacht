@@ -1,5 +1,7 @@
 import 'package:copy_with_extension/copy_with_extension.dart';
+import 'package:equatable/equatable.dart';
 import 'package:isar/isar.dart';
+import 'package:riverpod/riverpod.dart';
 import 'package:yacht/yacht.dart';
 
 import 'city.dart';
@@ -8,7 +10,7 @@ part 'user.g.dart';
 
 @collection
 @CopyWith()
-class User with DataModel<User> {
+class User with DataModel<User>, EquatableMixin {
   @Index()
   @override
   final String? id;
@@ -27,4 +29,24 @@ class User with DataModel<User> {
   String toString() {
     return 'User $id [$internalKey] ($name ($age))';
   }
+
+  @override
+  List<Object?> get props => [id, name, age];
+}
+
+mixin UserAdapter on Repository<User> {
+  @override
+  String get baseUrl => super.baseUrl;
+
+  @override
+  CollectionSchema<User> get schema => UserSchema;
+}
+
+class UserRepository = Repository<User> with UserAdapter;
+
+final userRepositoryProvider =
+    Provider<Repository<User>>((_) => UserRepository());
+
+extension ProviderContainerUserX on ProviderContainer {
+  Repository<User> get users => read(userRepositoryProvider);
 }

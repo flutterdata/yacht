@@ -1,3 +1,4 @@
+import 'package:mockito/mockito.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:test/test.dart';
 import 'package:yacht/yacht.dart';
@@ -6,16 +7,36 @@ import '_support/city.dart';
 import '_support/user.dart';
 
 void main() {
+  late ProviderContainer container;
+  Function? dispose;
+
+  setUpAll(() async {
+    container = ProviderContainer();
+
+    final yachtInitializer = Yacht.initialize([
+      userRepositoryProvider,
+      cityRepositoryProvider,
+    ]);
+
+    await container.read(yachtInitializer.future);
+  });
+
+  tearDown(() {
+    dispose?.call();
+  });
+
+  tearDownAll(() async {
+    await Yacht.dispose();
+    container.dispose();
+  });
+
   group('Basic operations', () {
     test('Write, read, serialize', () async {
-      await initialize(schemas: [UserSchema, CitySchema], clear: true);
-      final container = ProviderContainer();
-
       final zoe = User(id: 'zoe', name: 'Jane', age: 36).copyWith.name('Zoe');
 
       zoe.save();
 
-      final existingUser = container.users.findOne('zoe');
+      final existingUser = await container.users.findOne('zoe');
       expect(existingUser!.name, 'Zoe');
 
       zoe.hometown.value = City(id: '9', name: 'London').save();
@@ -41,12 +62,32 @@ void main() {
         'name': 'London',
       });
     });
+    test('notifiers', () async {
+      final listener = Listener<List<City>>();
+
+      final notifier = container.cities.watchAll();
+
+      dispose = notifier.addListener(listener);
+
+      verify(listener([])).called(1);
+
+      final rio = City(id: '1', name: 'Rio de Janeiro').save();
+      await oneMs();
+
+      verify(listener([rio])).called(1);
+
+      verifyNoMoreInteractions(listener);
+    });
   });
 }
 
-// gen
+// test utils
 
-extension ProviderContainerX on ProviderContainer {
-  Repository<User> get users => Repository<User>();
-  Repository<City> get cities => Repository<City>();
+class Listener<T> extends Mock {
+  void call(T value);
+}
+
+/// Waits 1 millisecond
+Future<void> oneMs() async {
+  await Future.delayed(const Duration(milliseconds: 1));
 }
