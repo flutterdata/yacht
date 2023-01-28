@@ -29,32 +29,14 @@ class Yacht {
     };
 
     isar = await Isar.open(schemas);
-
-    // final clear = true;
-
-    // if (clear) {
-    //   isar.writeTxnSync(() => isar.clearSync());
-    // }
   });
 
-  static Future<void> dispose() async {
-    await isar.close(deleteFromDisk: true);
+  static void clear() {
+    isar.writeTxnSync(() => isar.clearSync());
+  }
+
+  static Future<void> dispose({bool destroy = false}) async {
+    await isar.close(deleteFromDisk: destroy);
     repositories.clear();
   }
-}
-
-//
-
-extension IsarCollectionX<T> on IsarCollection<T> {
-  T? findById(Object id) => buildQuery<T>(whereClauses: [
-        IndexWhereClause.equalTo(indexName: 'id', value: [id])
-      ]).findFirstSync();
-
-  Query<T> findByKey(int key) => buildQuery<T>(
-      whereClauses: [IdWhereClause.between(lower: key, upper: key)]);
-}
-
-extension StringUtilsX on String {
-  String capitalize() =>
-      isEmpty ? '' : '${this[0].toUpperCase()}${substring(1)}';
 }

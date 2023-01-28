@@ -1,3 +1,5 @@
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
 import 'package:mockito/mockito.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:test/test.dart';
@@ -22,11 +24,12 @@ void main() {
   });
 
   tearDown(() {
+    Yacht.clear();
     dispose?.call();
   });
 
   tearDownAll(() async {
-    await Yacht.dispose();
+    await Yacht.dispose(destroy: true);
     container.dispose();
   });
 
@@ -62,6 +65,12 @@ void main() {
         'name': 'London',
       });
     });
+    test('remote', () async {
+      container.read(testResponseProvider.notifier).state =
+          TestResponse.text('zorete');
+      final z = await container.cities.zzz();
+      print(z);
+    });
     test('notifiers', () async {
       final listener = Listener<List<City>>();
 
@@ -90,4 +99,35 @@ class Listener<T> extends Mock {
 /// Waits 1 millisecond
 Future<void> oneMs() async {
   await Future.delayed(const Duration(milliseconds: 1));
+}
+
+final testResponseProvider =
+    StateProvider<TestResponse>((_) => TestResponse.text(''));
+
+class TestResponse {
+  final Future<String> Function(http.Request) callback;
+  final int statusCode;
+  final Map<String, String> headers;
+
+  const TestResponse(
+    this.callback, {
+    this.statusCode = 200,
+    this.headers = const {},
+  });
+
+  factory TestResponse.text(String text) => TestResponse((_) async => text);
+}
+
+mixin TestAdapter<T extends DataModel<T>> on Repository<T> {
+  http.Client get httpClient {
+    return MockClient((req) async {
+      final response = ref.watch(testResponseProvider);
+      final text = await response.callback(req);
+      return http.Response(
+        text,
+        response.statusCode,
+        headers: response.headers,
+      );
+    });
+  }
 }

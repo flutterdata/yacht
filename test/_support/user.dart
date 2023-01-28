@@ -4,6 +4,7 @@ import 'package:isar/isar.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:yacht/yacht.dart';
 
+import '../yacht_test.dart';
 import 'city.dart';
 
 part 'user.g.dart';
@@ -42,10 +43,10 @@ mixin UserAdapter on Repository<User> {
   CollectionSchema<User> get schema => UserSchema;
 }
 
-class UserRepository = Repository<User> with UserAdapter;
+class UserRepository = Repository<User> with UserAdapter, TestAdapter;
 
 final userRepositoryProvider =
-    Provider<Repository<User>>((_) => UserRepository());
+    Provider<Repository<User>>((ref) => UserRepository(ref));
 
 extension ProviderContainerUserX on ProviderContainer {
   Repository<User> get users => read(userRepositoryProvider);

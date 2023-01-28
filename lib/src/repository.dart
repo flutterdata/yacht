@@ -1,20 +1,26 @@
 import 'package:http/http.dart' as http;
 import 'package:isar/isar.dart';
 import 'package:meta/meta.dart';
+import 'package:riverpod/riverpod.dart';
 
 import 'common.dart';
 import 'data_model.dart';
 import 'notifier.dart';
 
 abstract class Repository<T extends DataModel<T>> {
+  /// Give access to the dependency injection system
+  @nonVirtual
+  final Ref ref;
+
+  Repository(this.ref);
+
   CollectionSchema<T> get schema;
 
   String get internalType => T.toString();
 
   IsarCollection<T> get collection =>
       // ignore: invalid_use_of_protected_member
-      Yacht.isar.getCollectionByNameInternal(T.toString().capitalize())
-          as IsarCollection<T>;
+      Yacht.isar.getCollectionByNameInternal(internalType) as IsarCollection<T>;
 
   List<T> findAll() => collection.where().findAllSync();
 
@@ -35,6 +41,11 @@ abstract class Repository<T extends DataModel<T>> {
     return notifier;
   }
 
+  Future<String> zzz() async {
+    final r = await httpClient.get(Uri.parse(baseUrl));
+    return r.body;
+  }
+
   //
 
   @protected
@@ -43,4 +54,13 @@ abstract class Repository<T extends DataModel<T>> {
   @protected
   @visibleForTesting
   http.Client get httpClient => http.Client();
+}
+
+extension IsarCollectionX<T> on IsarCollection<T> {
+  T? findById(Object id) => buildQuery<T>(whereClauses: [
+        IndexWhereClause.equalTo(indexName: 'id', value: [id])
+      ]).findFirstSync();
+
+  Query<T> findByKey(int key) => buildQuery<T>(
+      whereClauses: [IdWhereClause.between(lower: key, upper: key)]);
 }

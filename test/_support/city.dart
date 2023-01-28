@@ -4,6 +4,8 @@ import 'package:isar/isar.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:yacht/yacht.dart';
 
+import '../yacht_test.dart';
+
 part 'city.g.dart';
 
 @collection
@@ -23,7 +25,7 @@ class City with DataModel<City>, EquatableMixin {
 }
 
 final cityRepositoryProvider =
-    Provider<Repository<City>>((_) => CityRepository());
+    Provider<Repository<City>>((ref) => CityRepository(ref));
 
 //
 
@@ -35,9 +37,7 @@ mixin CityAdapter on Repository<City> {
   CollectionSchema<City> get schema => CitySchema;
 }
 
-mixin CityAdapter2 on Repository<City> {}
-
-class CityRepository = Repository<City> with CityAdapter, CityAdapter2;
+class CityRepository = Repository<City> with CityAdapter, TestAdapter;
 
 //
 
