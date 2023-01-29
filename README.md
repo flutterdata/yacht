@@ -16,7 +16,7 @@ STILL WIP!
 
 ## example
 
-Simplified unfinished pseudo-code:
+Simplified unfinished broken pseudo-code, but so that you get an idea:
 
 ```dart
 @collection
@@ -32,9 +32,34 @@ class User with DataModel<User> {
 
   User({this.id, this.name, this.age});
 }
+```
 
-// TODO initialize container
+Initialize
 
+```dart
+final yachtInitializer = Yacht.initialize([
+    userRepositoryProvider,
+    cityRepositoryProvider,
+]);
+
+// in Flutter
+
+ref.watch(yachtInitializer).when(
+    error: (error, _) => Text(error.toString()),
+    loading: () => const CircularProgressIndicator(),
+    data: (_) => Text('Hello from Yacht! ${ref.users}'),
+    ),
+
+// in Dart
+
+final container = ProviderContainer();
+
+await container.read(yachtInitializer.future);
+```
+
+Usage
+
+```dart
 final jane = User(id: '1', name: 'Jane', age: 36).save();
 assert(jane == container.users.findOne('1'));
 
@@ -43,7 +68,7 @@ assert(jane.hometown.value!.name == 'London');
 
 assert(jane.toJson() == {
     'id': '1',
-    'firstName': 'Jane',
+    'name': 'Jane',
     'age': 36,
     'hometown': 'LON',
     });
