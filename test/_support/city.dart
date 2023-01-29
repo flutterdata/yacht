@@ -8,7 +8,7 @@ import '../yacht_test.dart';
 
 part 'city.g.dart';
 
-@collection
+@Collection(ignore: {'props', 'hashCode', 'stringify'})
 @CopyWith()
 class City with DataModel<City>, EquatableMixin {
   @Index()
@@ -24,22 +24,19 @@ class City with DataModel<City>, EquatableMixin {
   List<Object?> get props => [id, name, population];
 }
 
-final cityRepositoryProvider =
-    Provider<Repository<City>>((ref) => CityRepository(ref));
+class TestCityRepository = CityRepository with TestAdapter;
 
-//
+// gen
 
 mixin CityAdapter on Repository<City> {
-  @override
-  String get baseUrl => super.baseUrl;
-
   @override
   CollectionSchema<City> get schema => CitySchema;
 }
 
-class CityRepository = Repository<City> with CityAdapter, TestAdapter;
+class CityRepository = Repository<City> with CityAdapter;
 
-//
+final cityRepositoryProvider =
+    Provider<Repository<City>>((ref) => CityRepository(ref));
 
 extension ProviderContainerCityX on ProviderContainer {
   Repository<City> get cities => read(cityRepositoryProvider);

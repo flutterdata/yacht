@@ -13,12 +13,17 @@ void main() {
   Function? dispose;
 
   setUpAll(() async {
-    container = ProviderContainer();
-
     final yachtInitializer = Yacht.initialize([
       userRepositoryProvider,
       cityRepositoryProvider,
     ]);
+
+    container = ProviderContainer(
+      overrides: [
+        userRepositoryProvider.overrideWith((ref) => TestUserRepository(ref)),
+        cityRepositoryProvider.overrideWith((ref) => TestCityRepository(ref)),
+      ],
+    );
 
     await container.read(yachtInitializer.future);
   });
@@ -33,13 +38,20 @@ void main() {
     container.dispose();
   });
 
-  group('Basic operations', () {
-    test('Write, read, serialize', () async {
-      final zoe = User(id: 'zoe', name: 'Jane', age: 36).copyWith.name('Zoe');
+  group('basic >', () {
+    test('save, find, serialize', () async {
+      final u1 = User(id: '1', name: 'Jane', age: 36);
 
-      zoe.save();
+      expect(u1.isNew, isTrue);
+      u1.save();
+      expect(u1.isNew, isFalse);
 
-      final existingUser = await container.users.findOne('zoe');
+      final zoe = User(id: '1', name: 'Zoe', age: 36).save();
+
+      expect(u1.yachtKey, zoe.yachtKey);
+      expect(zoe.yachtKey, zoe.reload()!.yachtKey);
+
+      final existingUser = container.users.findOne('1');
       expect(existingUser!.name, 'Zoe');
 
       zoe.hometown.value = City(id: '9', name: 'London').save();
@@ -48,7 +60,7 @@ void main() {
       expect(zoe.hometown.value!.name, 'London');
 
       expect(zoe.toJson(), {
-        'id': 'zoe',
+        'id': '1',
         'firstName': 'Zoe',
         'age': 36,
         'hometown': '9',
@@ -71,7 +83,9 @@ void main() {
       final z = await container.cities.zzz();
       print(z);
     });
-    test('notifiers', () async {
+  });
+  group('notifiers >', () {
+    test('watchAll', () async {
       final listener = Listener<List<City>>();
 
       final notifier = container.cities.watchAll();
@@ -84,6 +98,32 @@ void main() {
       await oneMs();
 
       verify(listener([rio])).called(1);
+
+      verifyNoMoreInteractions(listener);
+    });
+
+    test('watchOne', () async {
+      final listener = Listener<City?>();
+
+      final rio = City(id: '91', name: 'Rio de Janeiro').save();
+
+      final notifier = container.cities.watchOne(rio);
+
+      dispose = notifier.addListener(listener);
+
+      verify(listener(rio)).called(1);
+
+      final rio2 = rio.copyWith(population: 2887614).save();
+      await oneMs();
+
+      verify(listener(argThat(
+              isA<City>().having((c) => c.population, 'population', 2887614))))
+          .called(1);
+
+      rio2.delete();
+      await oneMs();
+
+      verify(listener(argThat(isNull)));
 
       verifyNoMoreInteractions(listener);
     });

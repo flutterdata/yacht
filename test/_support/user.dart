@@ -9,7 +9,7 @@ import 'city.dart';
 
 part 'user.g.dart';
 
-@collection
+@Collection(ignore: {'props', 'hashCode', 'stringify'})
 @CopyWith()
 class User with DataModel<User>, EquatableMixin {
   @Index()
@@ -28,22 +28,23 @@ class User with DataModel<User>, EquatableMixin {
 
   @override
   String toString() {
-    return 'User $id [$internalKey] ($name ($age))';
+    return 'User $id [${DataModel.keyFor(this)}] ($name ($age))';
   }
 
   @override
   List<Object?> get props => [id, name, age];
 }
 
-mixin UserAdapter on Repository<User> {
-  @override
-  String get baseUrl => super.baseUrl;
+class TestUserRepository = UserRepository with TestAdapter;
 
+// gen
+
+mixin UserAdapter on Repository<User> {
   @override
   CollectionSchema<User> get schema => UserSchema;
 }
 
-class UserRepository = Repository<User> with UserAdapter, TestAdapter;
+class UserRepository = Repository<User> with UserAdapter;
 
 final userRepositoryProvider =
     Provider<Repository<User>>((ref) => UserRepository(ref));

@@ -113,7 +113,7 @@ const CitySchema = CollectionSchema(
   serialize: _citySerialize,
   deserialize: _cityDeserialize,
   deserializeProp: _cityDeserializeProp,
-  idName: r'internalKey',
+  idName: r'yachtKey',
   indexes: {
     r'id': IndexSchema(
       id: -3268401673993471357,
@@ -175,6 +175,7 @@ City _cityDeserialize(
     name: reader.readStringOrNull(offsets[1]),
     population: reader.readLongOrNull(offsets[2]),
   );
+  object.yachtKey = id;
   return object;
 }
 
@@ -197,17 +198,19 @@ P _cityDeserializeProp<P>(
 }
 
 Id _cityGetId(City object) {
-  return object.internalKey;
+  return object.yachtKey;
 }
 
 List<IsarLinkBase<dynamic>> _cityGetLinks(City object) {
   return [];
 }
 
-void _cityAttach(IsarCollection<dynamic> col, Id id, City object) {}
+void _cityAttach(IsarCollection<dynamic> col, Id id, City object) {
+  object.yachtKey = id;
+}
 
 extension CityQueryWhereSort on QueryBuilder<City, City, QWhere> {
-  QueryBuilder<City, City, QAfterWhere> anyInternalKey() {
+  QueryBuilder<City, City, QAfterWhere> anyYachtKey() {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(const IdWhereClause.any());
     });
@@ -215,72 +218,66 @@ extension CityQueryWhereSort on QueryBuilder<City, City, QWhere> {
 }
 
 extension CityQueryWhere on QueryBuilder<City, City, QWhereClause> {
-  QueryBuilder<City, City, QAfterWhereClause> internalKeyEqualTo(
-      Id internalKey) {
+  QueryBuilder<City, City, QAfterWhereClause> yachtKeyEqualTo(Id yachtKey) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IdWhereClause.between(
-        lower: internalKey,
-        upper: internalKey,
+        lower: yachtKey,
+        upper: yachtKey,
       ));
     });
   }
 
-  QueryBuilder<City, City, QAfterWhereClause> internalKeyNotEqualTo(
-      Id internalKey) {
+  QueryBuilder<City, City, QAfterWhereClause> yachtKeyNotEqualTo(Id yachtKey) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
         return query
             .addWhereClause(
-              IdWhereClause.lessThan(upper: internalKey, includeUpper: false),
+              IdWhereClause.lessThan(upper: yachtKey, includeUpper: false),
             )
             .addWhereClause(
-              IdWhereClause.greaterThan(
-                  lower: internalKey, includeLower: false),
+              IdWhereClause.greaterThan(lower: yachtKey, includeLower: false),
             );
       } else {
         return query
             .addWhereClause(
-              IdWhereClause.greaterThan(
-                  lower: internalKey, includeLower: false),
+              IdWhereClause.greaterThan(lower: yachtKey, includeLower: false),
             )
             .addWhereClause(
-              IdWhereClause.lessThan(upper: internalKey, includeUpper: false),
+              IdWhereClause.lessThan(upper: yachtKey, includeUpper: false),
             );
       }
     });
   }
 
-  QueryBuilder<City, City, QAfterWhereClause> internalKeyGreaterThan(
-      Id internalKey,
+  QueryBuilder<City, City, QAfterWhereClause> yachtKeyGreaterThan(Id yachtKey,
       {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
-        IdWhereClause.greaterThan(lower: internalKey, includeLower: include),
+        IdWhereClause.greaterThan(lower: yachtKey, includeLower: include),
       );
     });
   }
 
-  QueryBuilder<City, City, QAfterWhereClause> internalKeyLessThan(
-      Id internalKey,
+  QueryBuilder<City, City, QAfterWhereClause> yachtKeyLessThan(Id yachtKey,
       {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
-        IdWhereClause.lessThan(upper: internalKey, includeUpper: include),
+        IdWhereClause.lessThan(upper: yachtKey, includeUpper: include),
       );
     });
   }
 
-  QueryBuilder<City, City, QAfterWhereClause> internalKeyBetween(
-    Id lowerInternalKey,
-    Id upperInternalKey, {
+  QueryBuilder<City, City, QAfterWhereClause> yachtKeyBetween(
+    Id lowerYachtKey,
+    Id upperYachtKey, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IdWhereClause.between(
-        lower: lowerInternalKey,
+        lower: lowerYachtKey,
         includeLower: includeLower,
-        upper: upperInternalKey,
+        upper: upperYachtKey,
         includeUpper: includeUpper,
       ));
     });
@@ -455,58 +452,6 @@ extension CityQueryFilter on QueryBuilder<City, City, QFilterCondition> {
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'id',
         value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<City, City, QAfterFilterCondition> internalKeyEqualTo(Id value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'internalKey',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<City, City, QAfterFilterCondition> internalKeyGreaterThan(
-    Id value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'internalKey',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<City, City, QAfterFilterCondition> internalKeyLessThan(
-    Id value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'internalKey',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<City, City, QAfterFilterCondition> internalKeyBetween(
-    Id lower,
-    Id upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'internalKey',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
       ));
     });
   }
@@ -723,6 +668,58 @@ extension CityQueryFilter on QueryBuilder<City, City, QFilterCondition> {
       ));
     });
   }
+
+  QueryBuilder<City, City, QAfterFilterCondition> yachtKeyEqualTo(Id value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'yachtKey',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<City, City, QAfterFilterCondition> yachtKeyGreaterThan(
+    Id value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'yachtKey',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<City, City, QAfterFilterCondition> yachtKeyLessThan(
+    Id value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'yachtKey',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<City, City, QAfterFilterCondition> yachtKeyBetween(
+    Id lower,
+    Id upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'yachtKey',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
 }
 
 extension CityQueryObject on QueryBuilder<City, City, QFilterCondition> {}
@@ -780,18 +777,6 @@ extension CityQuerySortThenBy on QueryBuilder<City, City, QSortThenBy> {
     });
   }
 
-  QueryBuilder<City, City, QAfterSortBy> thenByInternalKey() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'internalKey', Sort.asc);
-    });
-  }
-
-  QueryBuilder<City, City, QAfterSortBy> thenByInternalKeyDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'internalKey', Sort.desc);
-    });
-  }
-
   QueryBuilder<City, City, QAfterSortBy> thenByName() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'name', Sort.asc);
@@ -813,6 +798,18 @@ extension CityQuerySortThenBy on QueryBuilder<City, City, QSortThenBy> {
   QueryBuilder<City, City, QAfterSortBy> thenByPopulationDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'population', Sort.desc);
+    });
+  }
+
+  QueryBuilder<City, City, QAfterSortBy> thenByYachtKey() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'yachtKey', Sort.asc);
+    });
+  }
+
+  QueryBuilder<City, City, QAfterSortBy> thenByYachtKeyDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'yachtKey', Sort.desc);
     });
   }
 }
@@ -840,9 +837,9 @@ extension CityQueryWhereDistinct on QueryBuilder<City, City, QDistinct> {
 }
 
 extension CityQueryProperty on QueryBuilder<City, City, QQueryProperty> {
-  QueryBuilder<City, int, QQueryOperations> internalKeyProperty() {
+  QueryBuilder<City, int, QQueryOperations> yachtKeyProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'internalKey');
+      return query.addPropertyName(r'yachtKey');
     });
   }
 

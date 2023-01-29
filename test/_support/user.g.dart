@@ -112,7 +112,7 @@ const UserSchema = CollectionSchema(
   serialize: _userSerialize,
   deserialize: _userDeserialize,
   deserializeProp: _userDeserializeProp,
-  idName: r'internalKey',
+  idName: r'yachtKey',
   indexes: {
     r'id': IndexSchema(
       id: -3268401673993471357,
@@ -192,6 +192,7 @@ User _userDeserialize(
     name: reader.readStringOrNull(offsets[1]),
     id: reader.readStringOrNull(offsets[2]),
   );
+  object.yachtKey = id;
   return object;
 }
 
@@ -214,7 +215,7 @@ P _userDeserializeProp<P>(
 }
 
 Id _userGetId(User object) {
-  return object.internalKey;
+  return object.yachtKey;
 }
 
 List<IsarLinkBase<dynamic>> _userGetLinks(User object) {
@@ -222,12 +223,13 @@ List<IsarLinkBase<dynamic>> _userGetLinks(User object) {
 }
 
 void _userAttach(IsarCollection<dynamic> col, Id id, User object) {
+  object.yachtKey = id;
   object.hometown.attach(col, col.isar.collection<City>(), r'hometown', id);
   object.bucketList.attach(col, col.isar.collection<City>(), r'bucketList', id);
 }
 
 extension UserQueryWhereSort on QueryBuilder<User, User, QWhere> {
-  QueryBuilder<User, User, QAfterWhere> anyInternalKey() {
+  QueryBuilder<User, User, QAfterWhere> anyYachtKey() {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(const IdWhereClause.any());
     });
@@ -235,72 +237,66 @@ extension UserQueryWhereSort on QueryBuilder<User, User, QWhere> {
 }
 
 extension UserQueryWhere on QueryBuilder<User, User, QWhereClause> {
-  QueryBuilder<User, User, QAfterWhereClause> internalKeyEqualTo(
-      Id internalKey) {
+  QueryBuilder<User, User, QAfterWhereClause> yachtKeyEqualTo(Id yachtKey) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IdWhereClause.between(
-        lower: internalKey,
-        upper: internalKey,
+        lower: yachtKey,
+        upper: yachtKey,
       ));
     });
   }
 
-  QueryBuilder<User, User, QAfterWhereClause> internalKeyNotEqualTo(
-      Id internalKey) {
+  QueryBuilder<User, User, QAfterWhereClause> yachtKeyNotEqualTo(Id yachtKey) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
         return query
             .addWhereClause(
-              IdWhereClause.lessThan(upper: internalKey, includeUpper: false),
+              IdWhereClause.lessThan(upper: yachtKey, includeUpper: false),
             )
             .addWhereClause(
-              IdWhereClause.greaterThan(
-                  lower: internalKey, includeLower: false),
+              IdWhereClause.greaterThan(lower: yachtKey, includeLower: false),
             );
       } else {
         return query
             .addWhereClause(
-              IdWhereClause.greaterThan(
-                  lower: internalKey, includeLower: false),
+              IdWhereClause.greaterThan(lower: yachtKey, includeLower: false),
             )
             .addWhereClause(
-              IdWhereClause.lessThan(upper: internalKey, includeUpper: false),
+              IdWhereClause.lessThan(upper: yachtKey, includeUpper: false),
             );
       }
     });
   }
 
-  QueryBuilder<User, User, QAfterWhereClause> internalKeyGreaterThan(
-      Id internalKey,
+  QueryBuilder<User, User, QAfterWhereClause> yachtKeyGreaterThan(Id yachtKey,
       {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
-        IdWhereClause.greaterThan(lower: internalKey, includeLower: include),
+        IdWhereClause.greaterThan(lower: yachtKey, includeLower: include),
       );
     });
   }
 
-  QueryBuilder<User, User, QAfterWhereClause> internalKeyLessThan(
-      Id internalKey,
+  QueryBuilder<User, User, QAfterWhereClause> yachtKeyLessThan(Id yachtKey,
       {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
-        IdWhereClause.lessThan(upper: internalKey, includeUpper: include),
+        IdWhereClause.lessThan(upper: yachtKey, includeUpper: include),
       );
     });
   }
 
-  QueryBuilder<User, User, QAfterWhereClause> internalKeyBetween(
-    Id lowerInternalKey,
-    Id upperInternalKey, {
+  QueryBuilder<User, User, QAfterWhereClause> yachtKeyBetween(
+    Id lowerYachtKey,
+    Id upperYachtKey, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IdWhereClause.between(
-        lower: lowerInternalKey,
+        lower: lowerYachtKey,
         includeLower: includeLower,
-        upper: upperInternalKey,
+        upper: upperYachtKey,
         includeUpper: includeUpper,
       ));
     });
@@ -727,42 +723,42 @@ extension UserQueryFilter on QueryBuilder<User, User, QFilterCondition> {
     });
   }
 
-  QueryBuilder<User, User, QAfterFilterCondition> internalKeyEqualTo(Id value) {
+  QueryBuilder<User, User, QAfterFilterCondition> yachtKeyEqualTo(Id value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'internalKey',
+        property: r'yachtKey',
         value: value,
       ));
     });
   }
 
-  QueryBuilder<User, User, QAfterFilterCondition> internalKeyGreaterThan(
+  QueryBuilder<User, User, QAfterFilterCondition> yachtKeyGreaterThan(
     Id value, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r'internalKey',
+        property: r'yachtKey',
         value: value,
       ));
     });
   }
 
-  QueryBuilder<User, User, QAfterFilterCondition> internalKeyLessThan(
+  QueryBuilder<User, User, QAfterFilterCondition> yachtKeyLessThan(
     Id value, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r'internalKey',
+        property: r'yachtKey',
         value: value,
       ));
     });
   }
 
-  QueryBuilder<User, User, QAfterFilterCondition> internalKeyBetween(
+  QueryBuilder<User, User, QAfterFilterCondition> yachtKeyBetween(
     Id lower,
     Id upper, {
     bool includeLower = true,
@@ -770,7 +766,7 @@ extension UserQueryFilter on QueryBuilder<User, User, QFilterCondition> {
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r'internalKey',
+        property: r'yachtKey',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -928,15 +924,15 @@ extension UserQuerySortThenBy on QueryBuilder<User, User, QSortThenBy> {
     });
   }
 
-  QueryBuilder<User, User, QAfterSortBy> thenByInternalKey() {
+  QueryBuilder<User, User, QAfterSortBy> thenByYachtKey() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'internalKey', Sort.asc);
+      return query.addSortBy(r'yachtKey', Sort.asc);
     });
   }
 
-  QueryBuilder<User, User, QAfterSortBy> thenByInternalKeyDesc() {
+  QueryBuilder<User, User, QAfterSortBy> thenByYachtKeyDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'internalKey', Sort.desc);
+      return query.addSortBy(r'yachtKey', Sort.desc);
     });
   }
 }
@@ -964,9 +960,9 @@ extension UserQueryWhereDistinct on QueryBuilder<User, User, QDistinct> {
 }
 
 extension UserQueryProperty on QueryBuilder<User, User, QQueryProperty> {
-  QueryBuilder<User, int, QQueryOperations> internalKeyProperty() {
+  QueryBuilder<User, int, QQueryOperations> yachtKeyProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'internalKey');
+      return query.addPropertyName(r'yachtKey');
     });
   }
 

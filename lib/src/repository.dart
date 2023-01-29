@@ -24,9 +24,9 @@ abstract class Repository<T extends DataModel<T>> {
 
   List<T> findAll() => collection.where().findAllSync();
 
-  Future<T?> findOne(Object id) async {
-    return collection.findById(id);
-  }
+  T? findOne(Object id) => collection.queryById(id).findFirstSync();
+
+  bool exists(Object id) => collection.queryById(id).isNotEmptySync();
 
   void clear() => Yacht.isar.writeTxnSync(() => collection.clearSync());
 
@@ -40,6 +40,20 @@ abstract class Repository<T extends DataModel<T>> {
     notifier.onDispose = () => _sub.cancel();
     return notifier;
   }
+
+  ValueNotifier<T?> watchOne(T model) {
+    final notifier = ValueNotifier<T?>(model);
+    final _sub =
+        collection.watchObjectLazy(DataModel.keyFor(model)).listen((_) {
+      notifier.updateWith(model.reload());
+    });
+    notifier.onDispose = () {
+      return _sub.cancel();
+    };
+    return notifier;
+  }
+
+  // remote
 
   Future<String> zzz() async {
     final r = await httpClient.get(Uri.parse(baseUrl));
@@ -57,10 +71,10 @@ abstract class Repository<T extends DataModel<T>> {
 }
 
 extension IsarCollectionX<T> on IsarCollection<T> {
-  T? findById(Object id) => buildQuery<T>(whereClauses: [
+  Query<T> queryById(Object id) => buildQuery<T>(whereClauses: [
         IndexWhereClause.equalTo(indexName: 'id', value: [id])
-      ]).findFirstSync();
+      ]);
 
-  Query<T> findByKey(int key) => buildQuery<T>(
+  Query<T> queryByKey(int key) => buildQuery<T>(
       whereClauses: [IdWhereClause.between(lower: key, upper: key)]);
 }
