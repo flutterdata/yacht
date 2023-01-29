@@ -47,7 +47,15 @@ void main() {
       u1.save();
       expect(u1.isNew, isFalse);
 
-      final zoe = User(id: '1', name: 'Zoe', age: 36).save();
+      final zoe = User(
+              id: '1',
+              name: 'Zoe',
+              dob: DateTime.utc(1987, 1, 17),
+              job: Job()
+                ..employer = 'self'
+                ..title = 'engineer',
+              age: 36)
+          .save();
 
       expect(u1.yachtKey, zoe.yachtKey);
       expect(zoe.yachtKey, zoe.reload()!.yachtKey);
@@ -64,8 +72,11 @@ void main() {
         'id': '1',
         'firstName': 'Zoe',
         'age': 36,
+        'dob': 537840000000000,
+        'job': {'employer': 'self', 'title': 'engineer'},
+        'priority': 'first',
         'hometown': '9',
-        'bucketList': ['92']
+        'bucketList': ['92'],
       });
 
       zoe.delete();
@@ -83,13 +94,15 @@ void main() {
         'id': '9',
         'name': 'London',
       });
+
+      // access raw isar
+      expect(container.cities.collection.isar.citys.countSync(), 2);
     });
 
     test('remote', () async {
       container.read(testResponseProvider.notifier).state =
-          TestResponse.text('zorete');
-      final z = await container.cities.zzz();
-      print(z);
+          TestResponse.text('{"id": 1}');
+      await container.cities.zzz();
     });
   });
   group('notifiers >', () {

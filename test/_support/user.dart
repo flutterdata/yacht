@@ -19,12 +19,23 @@ class User with DataModel<User>, EquatableMixin {
   @Name("firstName")
   final String? name;
   final int? age;
+  final DateTime? dob;
+  @Enumerated(EnumType.name)
+  final Priority priority;
+  final Job? job;
 
   // relationships
   final hometown = IsarLink<City>();
   final bucketList = IsarLinks<City>();
 
-  User({this.id, this.name, this.age});
+  User({
+    this.id,
+    this.name,
+    this.age,
+    this.dob,
+    this.job,
+    this.priority = Priority.first,
+  });
 
   @override
   String toString() {
@@ -33,6 +44,22 @@ class User with DataModel<User>, EquatableMixin {
 
   @override
   List<Object?> get props => [id, name, age];
+}
+
+enum Priority {
+  first(10),
+  second(100),
+  third(1000);
+
+  const Priority(this.myValue);
+
+  final short myValue;
+}
+
+@embedded
+class Job {
+  late String title;
+  late String employer;
 }
 
 class TestUserRepository = UserRepository with TestAdapter;

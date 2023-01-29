@@ -7,7 +7,7 @@ class Yacht {
   static final initialize =
       FutureProvider.family<void, List<Provider<Repository>>>(
           (ref, repositoryProviders) async {
-    if (Isar.getInstance() != null) {
+    if (Isar.getInstance('yacht') != null) {
       return;
     }
 
@@ -23,7 +23,7 @@ class Yacht {
         repository.internalType: repository,
     };
 
-    _isar = await Isar.open(schemas, inspector: false);
+    _isar = await Isar.open(schemas, name: 'yacht', inspector: false);
   });
 
   static void clear() {

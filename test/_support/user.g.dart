@@ -13,6 +13,12 @@ abstract class _$UserCWProxy {
 
   User age(int? age);
 
+  User dob(DateTime? dob);
+
+  User job(Job? job);
+
+  User priority(Priority priority);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `User(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -23,6 +29,9 @@ abstract class _$UserCWProxy {
     String? id,
     String? name,
     int? age,
+    DateTime? dob,
+    Job? job,
+    Priority? priority,
   });
 }
 
@@ -42,6 +51,15 @@ class _$UserCWProxyImpl implements _$UserCWProxy {
   User age(int? age) => this(age: age);
 
   @override
+  User dob(DateTime? dob) => this(dob: dob);
+
+  @override
+  User job(Job? job) => this(job: job);
+
+  @override
+  User priority(Priority priority) => this(priority: priority);
+
+  @override
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `User(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
@@ -53,6 +71,9 @@ class _$UserCWProxyImpl implements _$UserCWProxy {
     Object? id = const $CopyWithPlaceholder(),
     Object? name = const $CopyWithPlaceholder(),
     Object? age = const $CopyWithPlaceholder(),
+    Object? dob = const $CopyWithPlaceholder(),
+    Object? job = const $CopyWithPlaceholder(),
+    Object? priority = const $CopyWithPlaceholder(),
   }) {
     return User(
       id: id == const $CopyWithPlaceholder()
@@ -67,6 +88,19 @@ class _$UserCWProxyImpl implements _$UserCWProxy {
           ? _value.age
           // ignore: cast_nullable_to_non_nullable
           : age as int?,
+      dob: dob == const $CopyWithPlaceholder()
+          ? _value.dob
+          // ignore: cast_nullable_to_non_nullable
+          : dob as DateTime?,
+      job: job == const $CopyWithPlaceholder()
+          ? _value.job
+          // ignore: cast_nullable_to_non_nullable
+          : job as Job?,
+      priority: priority == const $CopyWithPlaceholder() || priority == null
+          // ignore: unnecessary_non_null_assertion
+          ? _value.priority!
+          // ignore: cast_nullable_to_non_nullable
+          : priority as Priority,
     );
   }
 }
@@ -97,15 +131,32 @@ const UserSchema = CollectionSchema(
       name: r'age',
       type: IsarType.long,
     ),
-    r'firstName': PropertySchema(
+    r'dob': PropertySchema(
       id: 1,
+      name: r'dob',
+      type: IsarType.dateTime,
+    ),
+    r'firstName': PropertySchema(
+      id: 2,
       name: r'firstName',
       type: IsarType.string,
     ),
     r'id': PropertySchema(
-      id: 2,
+      id: 3,
       name: r'id',
       type: IsarType.string,
+    ),
+    r'job': PropertySchema(
+      id: 4,
+      name: r'job',
+      type: IsarType.object,
+      target: r'Job',
+    ),
+    r'priority': PropertySchema(
+      id: 5,
+      name: r'priority',
+      type: IsarType.string,
+      enumMap: _UserpriorityEnumValueMap,
     )
   },
   estimateSize: _userEstimateSize,
@@ -142,7 +193,7 @@ const UserSchema = CollectionSchema(
       single: false,
     )
   },
-  embeddedSchemas: {},
+  embeddedSchemas: {r'Job': JobSchema},
   getId: _userGetId,
   getLinks: _userGetLinks,
   attach: _userAttach,
@@ -167,6 +218,14 @@ int _userEstimateSize(
       bytesCount += 3 + value.length * 3;
     }
   }
+  {
+    final value = object.job;
+    if (value != null) {
+      bytesCount +=
+          3 + JobSchema.estimateSize(value, allOffsets[Job]!, allOffsets);
+    }
+  }
+  bytesCount += 3 + object.priority.name.length * 3;
   return bytesCount;
 }
 
@@ -177,8 +236,16 @@ void _userSerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeLong(offsets[0], object.age);
-  writer.writeString(offsets[1], object.name);
-  writer.writeString(offsets[2], object.id);
+  writer.writeDateTime(offsets[1], object.dob);
+  writer.writeString(offsets[2], object.name);
+  writer.writeString(offsets[3], object.id);
+  writer.writeObject<Job>(
+    offsets[4],
+    allOffsets,
+    JobSchema.serialize,
+    object.job,
+  );
+  writer.writeString(offsets[5], object.priority.name);
 }
 
 User _userDeserialize(
@@ -189,8 +256,16 @@ User _userDeserialize(
 ) {
   final object = User(
     age: reader.readLongOrNull(offsets[0]),
-    name: reader.readStringOrNull(offsets[1]),
-    id: reader.readStringOrNull(offsets[2]),
+    dob: reader.readDateTimeOrNull(offsets[1]),
+    name: reader.readStringOrNull(offsets[2]),
+    id: reader.readStringOrNull(offsets[3]),
+    job: reader.readObjectOrNull<Job>(
+      offsets[4],
+      JobSchema.deserialize,
+      allOffsets,
+    ),
+    priority: _UserpriorityValueEnumMap[reader.readStringOrNull(offsets[5])] ??
+        Priority.first,
   );
   object.yachtKey = id;
   return object;
@@ -206,13 +281,35 @@ P _userDeserializeProp<P>(
     case 0:
       return (reader.readLongOrNull(offset)) as P;
     case 1:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readDateTimeOrNull(offset)) as P;
     case 2:
       return (reader.readStringOrNull(offset)) as P;
+    case 3:
+      return (reader.readStringOrNull(offset)) as P;
+    case 4:
+      return (reader.readObjectOrNull<Job>(
+        offset,
+        JobSchema.deserialize,
+        allOffsets,
+      )) as P;
+    case 5:
+      return (_UserpriorityValueEnumMap[reader.readStringOrNull(offset)] ??
+          Priority.first) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
 }
+
+const _UserpriorityEnumValueMap = {
+  r'first': r'first',
+  r'second': r'second',
+  r'third': r'third',
+};
+const _UserpriorityValueEnumMap = {
+  r'first': Priority.first,
+  r'second': Priority.second,
+  r'third': Priority.third,
+};
 
 Id _userGetId(User object) {
   return object.yachtKey;
@@ -427,6 +524,74 @@ extension UserQueryFilter on QueryBuilder<User, User, QFilterCondition> {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
         property: r'age',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> dobIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'dob',
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> dobIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'dob',
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> dobEqualTo(DateTime? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'dob',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> dobGreaterThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'dob',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> dobLessThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'dob',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> dobBetween(
+    DateTime? lower,
+    DateTime? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'dob',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -723,6 +888,151 @@ extension UserQueryFilter on QueryBuilder<User, User, QFilterCondition> {
     });
   }
 
+  QueryBuilder<User, User, QAfterFilterCondition> jobIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'job',
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> jobIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'job',
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> priorityEqualTo(
+    Priority value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'priority',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> priorityGreaterThan(
+    Priority value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'priority',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> priorityLessThan(
+    Priority value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'priority',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> priorityBetween(
+    Priority lower,
+    Priority upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'priority',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> priorityStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'priority',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> priorityEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'priority',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> priorityContains(String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'priority',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> priorityMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'priority',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> priorityIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'priority',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> priorityIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'priority',
+        value: '',
+      ));
+    });
+  }
+
   QueryBuilder<User, User, QAfterFilterCondition> yachtKeyEqualTo(Id value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
@@ -776,7 +1086,13 @@ extension UserQueryFilter on QueryBuilder<User, User, QFilterCondition> {
   }
 }
 
-extension UserQueryObject on QueryBuilder<User, User, QFilterCondition> {}
+extension UserQueryObject on QueryBuilder<User, User, QFilterCondition> {
+  QueryBuilder<User, User, QAfterFilterCondition> job(FilterQuery<Job> q) {
+    return QueryBuilder.apply(this, (query) {
+      return query.object(q, r'job');
+    });
+  }
+}
 
 extension UserQueryLinks on QueryBuilder<User, User, QFilterCondition> {
   QueryBuilder<User, User, QAfterFilterCondition> hometown(
@@ -862,6 +1178,18 @@ extension UserQuerySortBy on QueryBuilder<User, User, QSortBy> {
     });
   }
 
+  QueryBuilder<User, User, QAfterSortBy> sortByDob() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'dob', Sort.asc);
+    });
+  }
+
+  QueryBuilder<User, User, QAfterSortBy> sortByDobDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'dob', Sort.desc);
+    });
+  }
+
   QueryBuilder<User, User, QAfterSortBy> sortByName() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'firstName', Sort.asc);
@@ -885,6 +1213,18 @@ extension UserQuerySortBy on QueryBuilder<User, User, QSortBy> {
       return query.addSortBy(r'id', Sort.desc);
     });
   }
+
+  QueryBuilder<User, User, QAfterSortBy> sortByPriority() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'priority', Sort.asc);
+    });
+  }
+
+  QueryBuilder<User, User, QAfterSortBy> sortByPriorityDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'priority', Sort.desc);
+    });
+  }
 }
 
 extension UserQuerySortThenBy on QueryBuilder<User, User, QSortThenBy> {
@@ -897,6 +1237,18 @@ extension UserQuerySortThenBy on QueryBuilder<User, User, QSortThenBy> {
   QueryBuilder<User, User, QAfterSortBy> thenByAgeDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'age', Sort.desc);
+    });
+  }
+
+  QueryBuilder<User, User, QAfterSortBy> thenByDob() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'dob', Sort.asc);
+    });
+  }
+
+  QueryBuilder<User, User, QAfterSortBy> thenByDobDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'dob', Sort.desc);
     });
   }
 
@@ -924,6 +1276,18 @@ extension UserQuerySortThenBy on QueryBuilder<User, User, QSortThenBy> {
     });
   }
 
+  QueryBuilder<User, User, QAfterSortBy> thenByPriority() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'priority', Sort.asc);
+    });
+  }
+
+  QueryBuilder<User, User, QAfterSortBy> thenByPriorityDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'priority', Sort.desc);
+    });
+  }
+
   QueryBuilder<User, User, QAfterSortBy> thenByYachtKey() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'yachtKey', Sort.asc);
@@ -944,6 +1308,12 @@ extension UserQueryWhereDistinct on QueryBuilder<User, User, QDistinct> {
     });
   }
 
+  QueryBuilder<User, User, QDistinct> distinctByDob() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'dob');
+    });
+  }
+
   QueryBuilder<User, User, QDistinct> distinctByName(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -955,6 +1325,13 @@ extension UserQueryWhereDistinct on QueryBuilder<User, User, QDistinct> {
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'id', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<User, User, QDistinct> distinctByPriority(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'priority', caseSensitive: caseSensitive);
     });
   }
 }
@@ -972,6 +1349,12 @@ extension UserQueryProperty on QueryBuilder<User, User, QQueryProperty> {
     });
   }
 
+  QueryBuilder<User, DateTime?, QQueryOperations> dobProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'dob');
+    });
+  }
+
   QueryBuilder<User, String?, QQueryOperations> nameProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'firstName');
@@ -983,4 +1366,353 @@ extension UserQueryProperty on QueryBuilder<User, User, QQueryProperty> {
       return query.addPropertyName(r'id');
     });
   }
+
+  QueryBuilder<User, Job?, QQueryOperations> jobProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'job');
+    });
+  }
+
+  QueryBuilder<User, Priority, QQueryOperations> priorityProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'priority');
+    });
+  }
 }
+
+// **************************************************************************
+// IsarEmbeddedGenerator
+// **************************************************************************
+
+// coverage:ignore-file
+// ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, prefer_const_constructors, lines_longer_than_80_chars, require_trailing_commas, inference_failure_on_function_invocation, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_checks, join_return_with_assignment, prefer_final_locals, avoid_js_rounded_ints, avoid_positional_boolean_parameters
+
+const JobSchema = Schema(
+  name: r'Job',
+  id: -5961302972855324388,
+  properties: {
+    r'employer': PropertySchema(
+      id: 0,
+      name: r'employer',
+      type: IsarType.string,
+    ),
+    r'title': PropertySchema(
+      id: 1,
+      name: r'title',
+      type: IsarType.string,
+    )
+  },
+  estimateSize: _jobEstimateSize,
+  serialize: _jobSerialize,
+  deserialize: _jobDeserialize,
+  deserializeProp: _jobDeserializeProp,
+);
+
+int _jobEstimateSize(
+  Job object,
+  List<int> offsets,
+  Map<Type, List<int>> allOffsets,
+) {
+  var bytesCount = offsets.last;
+  bytesCount += 3 + object.employer.length * 3;
+  bytesCount += 3 + object.title.length * 3;
+  return bytesCount;
+}
+
+void _jobSerialize(
+  Job object,
+  IsarWriter writer,
+  List<int> offsets,
+  Map<Type, List<int>> allOffsets,
+) {
+  writer.writeString(offsets[0], object.employer);
+  writer.writeString(offsets[1], object.title);
+}
+
+Job _jobDeserialize(
+  Id id,
+  IsarReader reader,
+  List<int> offsets,
+  Map<Type, List<int>> allOffsets,
+) {
+  final object = Job();
+  object.employer = reader.readString(offsets[0]);
+  object.title = reader.readString(offsets[1]);
+  return object;
+}
+
+P _jobDeserializeProp<P>(
+  IsarReader reader,
+  int propertyId,
+  int offset,
+  Map<Type, List<int>> allOffsets,
+) {
+  switch (propertyId) {
+    case 0:
+      return (reader.readString(offset)) as P;
+    case 1:
+      return (reader.readString(offset)) as P;
+    default:
+      throw IsarError('Unknown property with id $propertyId');
+  }
+}
+
+extension JobQueryFilter on QueryBuilder<Job, Job, QFilterCondition> {
+  QueryBuilder<Job, Job, QAfterFilterCondition> employerEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'employer',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Job, Job, QAfterFilterCondition> employerGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'employer',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Job, Job, QAfterFilterCondition> employerLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'employer',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Job, Job, QAfterFilterCondition> employerBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'employer',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Job, Job, QAfterFilterCondition> employerStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'employer',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Job, Job, QAfterFilterCondition> employerEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'employer',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Job, Job, QAfterFilterCondition> employerContains(String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'employer',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Job, Job, QAfterFilterCondition> employerMatches(String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'employer',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Job, Job, QAfterFilterCondition> employerIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'employer',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Job, Job, QAfterFilterCondition> employerIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'employer',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Job, Job, QAfterFilterCondition> titleEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'title',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Job, Job, QAfterFilterCondition> titleGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'title',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Job, Job, QAfterFilterCondition> titleLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'title',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Job, Job, QAfterFilterCondition> titleBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'title',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Job, Job, QAfterFilterCondition> titleStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'title',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Job, Job, QAfterFilterCondition> titleEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'title',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Job, Job, QAfterFilterCondition> titleContains(String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'title',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Job, Job, QAfterFilterCondition> titleMatches(String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'title',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Job, Job, QAfterFilterCondition> titleIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'title',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Job, Job, QAfterFilterCondition> titleIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'title',
+        value: '',
+      ));
+    });
+  }
+}
+
+extension JobQueryObject on QueryBuilder<Job, Job, QFilterCondition> {}
