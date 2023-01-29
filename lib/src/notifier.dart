@@ -1,4 +1,4 @@
-import 'package:riverpod/riverpod.dart';
+part of yacht;
 
 class ValueNotifier<E> extends StateNotifier<E> {
   Function? onDispose;

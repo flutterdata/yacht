@@ -1,11 +1,4 @@
-import 'package:http/http.dart' as http;
-import 'package:isar/isar.dart';
-import 'package:meta/meta.dart';
-import 'package:riverpod/riverpod.dart';
-
-import 'common.dart';
-import 'data_model.dart';
-import 'notifier.dart';
+part of yacht;
 
 abstract class Repository<T extends DataModel<T>> {
   /// Give access to the dependency injection system
@@ -14,21 +7,34 @@ abstract class Repository<T extends DataModel<T>> {
 
   Repository(this.ref);
 
+  @protected
   CollectionSchema<T> get schema;
+
+  // for use within library
+  CollectionSchema<T> get _schema => schema;
 
   String get internalType => T.toString();
 
   IsarCollection<T> get collection =>
       // ignore: invalid_use_of_protected_member
-      Yacht.isar.getCollectionByNameInternal(internalType) as IsarCollection<T>;
+      Yacht._isar.getCollectionByNameInternal(internalType)
+          as IsarCollection<T>;
 
-  List<T> findAll() => collection.where().findAllSync();
+  List<T> findAll(
+      {QueryBuilder<T, T, QQueryOperations> Function(
+              QueryBuilder<T, T, QWhere>)?
+          where}) {
+    if (where != null) {
+      return where(collection.where()).build().findAllSync();
+    }
+    return collection.where().findAllSync();
+  }
 
   T? findOne(Object id) => collection.queryById(id).findFirstSync();
 
   bool exists(Object id) => collection.queryById(id).isNotEmptySync();
 
-  void clear() => Yacht.isar.writeTxnSync(() => collection.clearSync());
+  void clear() => collection.isar.writeTxnSync(() => collection.clearSync());
 
   // watchers
 

@@ -1,5 +1,6 @@
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
+import 'package:isar/isar.dart';
 import 'package:mockito/mockito.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:test/test.dart';
@@ -72,11 +73,18 @@ void main() {
       expect(zoe.reload(), isNull);
 
       final cities = container.cities.findAll();
-      expect(cities.first.toJson(), {
+      expect(cities, hasLength(2));
+
+      final citiesFilter = container.cities.findAll(
+        where: (_) => _.filter().nameContains('don'),
+      );
+      expect(citiesFilter, hasLength(1));
+      expect(citiesFilter.first.toJson(), {
         'id': '9',
         'name': 'London',
       });
     });
+
     test('remote', () async {
       container.read(testResponseProvider.notifier).state =
           TestResponse.text('zorete');

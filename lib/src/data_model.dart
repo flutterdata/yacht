@@ -1,8 +1,4 @@
-import 'package:isar/isar.dart';
-import 'package:meta/meta.dart';
-
-import 'common.dart';
-import 'repository.dart';
+part of yacht;
 
 abstract class DataModel<T extends DataModel<T>> {
   Id _key = Isar.autoIncrement;
@@ -12,7 +8,7 @@ abstract class DataModel<T extends DataModel<T>> {
 
   Object? get id;
 
-  Isar get _isar => Yacht.isar;
+  Isar get _isar => repository.collection.isar;
 
   String get _internalType => T.toString();
 

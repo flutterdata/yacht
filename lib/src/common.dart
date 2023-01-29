@@ -1,12 +1,7 @@
-import 'dart:ffi';
-import 'dart:io';
-
-import 'package:isar/isar.dart';
-import 'package:riverpod/riverpod.dart';
-import 'package:yacht/yacht.dart';
+part of yacht;
 
 class Yacht {
-  static late Isar isar;
+  static late Isar _isar;
   static late Map<String, Repository> repositories;
 
   static final initialize =
@@ -21,22 +16,22 @@ class Yacht {
     });
 
     final _repositories = repositoryProviders.map(ref.read);
-    final schemas = _repositories.map((r) => r.schema).toList();
+    final schemas = _repositories.map((r) => r._schema).toList();
 
     repositories = {
       for (final repository in _repositories)
         repository.internalType: repository,
     };
 
-    isar = await Isar.open(schemas, inspector: false);
+    _isar = await Isar.open(schemas, inspector: false);
   });
 
   static void clear() {
-    isar.writeTxnSync(() => isar.clearSync());
+    _isar.writeTxnSync(() => _isar.clearSync());
   }
 
   static Future<void> dispose({bool destroy = false}) async {
-    await isar.close(deleteFromDisk: destroy);
+    await _isar.close(deleteFromDisk: destroy);
     repositories.clear();
   }
 }
