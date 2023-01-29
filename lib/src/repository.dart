@@ -38,11 +38,23 @@ abstract class Repository<T extends DataModel<T>> {
 
   // watchers
 
-  ValueNotifier<List<T>> watchAll() {
-    final notifier = ValueNotifier(findAll());
-    final _sub = collection.watchLazy().listen((_) {
-      notifier.updateWith(findAll());
-    });
+  ValueNotifier<List<T>> watchAll(
+      {QueryBuilder<T, T, QQueryOperations> Function(
+              QueryBuilder<T, T, QWhere>)?
+          where}) {
+    final notifier = ValueNotifier(findAll(where: where));
+    late StreamSubscription _sub;
+
+    if (where == null) {
+      _sub = collection.watchLazy().listen((_) {
+        notifier.updateWith(findAll());
+      });
+    } else {
+      _sub = where(collection.where()).watch().listen((results) {
+        notifier.updateWith(results);
+      });
+    }
+
     notifier.onDispose = () => _sub.cancel();
     return notifier;
   }

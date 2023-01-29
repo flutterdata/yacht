@@ -110,6 +110,29 @@ void main() {
       verifyNoMoreInteractions(listener);
     });
 
+    test('watchAll with query', () async {
+      final listener = Listener<List<City>>();
+
+      City(id: '1', name: 'Rio de Janeiro').save();
+      await oneMs();
+      final hk = City(id: '2', name: 'Hong Kong').save();
+      await oneMs();
+
+      final notifier = container.cities
+          .watchAll(where: (_) => _.filter().nameContains('on'));
+      dispose = notifier.addListener(listener);
+
+      verify(listener([hk])).called(1);
+
+      final london = City(id: '3', name: 'London').save();
+      await oneMs();
+      await oneMs();
+
+      verify(listener([hk, london])).called(1);
+
+      verifyNoMoreInteractions(listener);
+    });
+
     test('watchOne', () async {
       final listener = Listener<City?>();
 
