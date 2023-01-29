@@ -28,7 +28,7 @@ class User with DataModel<User>, EquatableMixin {
 
   @override
   String toString() {
-    return 'User $id [${DataModel.keyFor(this)}] ($name ($age))';
+    return 'User $id [$yachtKey] ($name ($age))';
   }
 
   @override

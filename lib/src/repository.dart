@@ -43,8 +43,7 @@ abstract class Repository<T extends DataModel<T>> {
 
   ValueNotifier<T?> watchOne(T model) {
     final notifier = ValueNotifier<T?>(model);
-    final _sub =
-        collection.watchObjectLazy(DataModel.keyFor(model)).listen((_) {
+    final _sub = collection.watchObjectLazy(model.yachtKey).listen((_) {
       notifier.updateWith(model.reload());
     });
     notifier.onDispose = () {

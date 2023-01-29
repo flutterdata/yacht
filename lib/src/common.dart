@@ -28,7 +28,7 @@ class Yacht {
         repository.internalType: repository,
     };
 
-    isar = await Isar.open(schemas);
+    isar = await Isar.open(schemas, inspector: false);
   });
 
   static void clear() {

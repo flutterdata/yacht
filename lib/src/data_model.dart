@@ -72,7 +72,4 @@ abstract class DataModel<T extends DataModel<T>> {
       ..remove('yachtKey')
       ..remove('hashCode');
   }
-
-  // TODO remove
-  static Id keyFor<T extends DataModel<T>>(T model) => model.yachtKey;
 }
