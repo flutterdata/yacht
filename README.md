@@ -76,9 +76,9 @@ assert(jane.toJson() == {
 jane.delete();
 assert(jane.reload() == null);
 
-await jane.save.remote();
+await jane.remote.save();
 
-await container.users.findOne.remote('1');
+await container.users.remote.findOne('1');
 assert(jane.reload() != null);
 ```
 
