@@ -1,3 +1,6 @@
+import 'dart:ffi';
+import 'dart:io';
+
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:isar/isar.dart';
@@ -14,6 +17,13 @@ void main() {
   Function? dispose;
 
   setUpAll(() async {
+    // needed for tests
+    await Isar.initializeIsarCore(
+      libraries: {
+        Abi.macosX64: File('test/_support/libisar.dylib').absolute.path,
+      },
+    );
+
     final yachtInitializer = Yacht.initialize([
       userRepositoryProvider,
       cityRepositoryProvider,
@@ -23,6 +33,14 @@ void main() {
       overrides: [
         userRepositoryProvider.overrideWith((ref) => TestUserRepository(ref)),
         cityRepositoryProvider.overrideWith((ref) => TestCityRepository(ref)),
+        yachtHttpClientProvider.overrideWith((ref) {
+          return MockClient((req) async {
+            final response = ref.watch(testResponseProvider);
+            final text = await response.callback(req);
+            return http.Response(text, response.statusCode,
+                headers: response.headers);
+          });
+        }),
       ],
     );
 
@@ -39,7 +57,7 @@ void main() {
     container.dispose();
   });
 
-  group('basic >', () {
+  group('basic', () {
     test('save, find, serialize', () async {
       final u1 = User(id: '1', name: 'Jane', age: 36);
 
@@ -102,10 +120,11 @@ void main() {
     test('remote', () async {
       container.read(testResponseProvider.notifier).state =
           TestResponse.text('{"id": 1}');
-      await container.cities.zzz();
+      await container.cities.async.findOne('1');
     });
   });
-  group('notifiers >', () {
+
+  group('notifiers', () {
     test('watchAll', () async {
       final listener = Listener<List<City>>();
 

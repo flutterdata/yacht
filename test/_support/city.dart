@@ -1,6 +1,7 @@
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:equatable/equatable.dart';
 import 'package:isar/isar.dart';
+import 'package:json_annotation/json_annotation.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:yacht/yacht.dart';
 
@@ -10,6 +11,7 @@ part 'city.g.dart';
 
 @Collection(ignore: {'props', 'hashCode', 'stringify'})
 @CopyWith()
+@JsonSerializable()
 class City with DataModel<City>, EquatableMixin {
   @Index()
   @override

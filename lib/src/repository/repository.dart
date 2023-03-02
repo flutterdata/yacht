@@ -1,11 +1,14 @@
 part of yacht;
 
-abstract class Repository<T extends DataModel<T>> {
+abstract class Repository<T extends DataModel<T>> = _BaseAdapter<T>
+    with _FinderAdapter<T>, _WatcherAdapter<T>;
+
+abstract class _BaseAdapter<T extends DataModel<T>> {
   /// Give access to the dependency injection system
   @nonVirtual
   final Ref ref;
 
-  Repository(this.ref);
+  _BaseAdapter(this.ref);
 
   @protected
   CollectionSchema<T> get schema;
@@ -20,24 +23,30 @@ abstract class Repository<T extends DataModel<T>> {
       Yacht._isar.getCollectionByNameInternal(internalType)
           as IsarCollection<T>;
 
+  _RemoteAdapter get async =>
+      _RemoteAdapter<T>(repository: this as Repository<T>);
+}
+
+mixin _FinderAdapter<T extends DataModel<T>> on _BaseAdapter<T> {
   List<T> findAll(
       {QueryBuilder<T, T, QQueryOperations> Function(
               QueryBuilder<T, T, QWhere>)?
           where}) {
     if (where != null) {
-      return where(collection.where()).build().findAllSync();
+      return where(super.collection.where()).build().findAllSync();
     }
-    return collection.where().findAllSync();
+    return super.collection.where().findAllSync();
   }
 
-  T? findOne(Object id) => collection.queryById(id).findFirstSync();
+  T? findOne(Object id) => super.collection.queryById(id).findFirstSync();
 
-  bool exists(Object id) => collection.queryById(id).isNotEmptySync();
+  bool exists(Object id) => super.collection.queryById(id).isNotEmptySync();
 
-  void clear() => collection.isar.writeTxnSync(() => collection.clearSync());
+  void clear() =>
+      super.collection.isar.writeTxnSync(() => super.collection.clearSync());
+}
 
-  // watchers
-
+mixin _WatcherAdapter<T extends DataModel<T>> on _FinderAdapter<T> {
   ValueNotifier<List<T>> watchAll(
       {QueryBuilder<T, T, QQueryOperations> Function(
               QueryBuilder<T, T, QWhere>)?
@@ -46,11 +55,11 @@ abstract class Repository<T extends DataModel<T>> {
     late StreamSubscription _sub;
 
     if (where == null) {
-      _sub = collection.watchLazy().listen((_) {
+      _sub = super.collection.watchLazy().listen((_) {
         notifier.updateWith(findAll());
       });
     } else {
-      _sub = where(collection.where()).watch().listen((results) {
+      _sub = where(super.collection.where()).watch().listen((results) {
         notifier.updateWith(results);
       });
     }
@@ -61,7 +70,7 @@ abstract class Repository<T extends DataModel<T>> {
 
   ValueNotifier<T?> watchOne(T model) {
     final notifier = ValueNotifier<T?>(model);
-    final _sub = collection.watchObjectLazy(model.yachtKey).listen((_) {
+    final _sub = super.collection.watchObjectLazy(model.yachtKey).listen((_) {
       notifier.updateWith(model.reload());
     });
     notifier.onDispose = () {
@@ -69,22 +78,6 @@ abstract class Repository<T extends DataModel<T>> {
     };
     return notifier;
   }
-
-  // remote
-
-  Future<String> zzz() async {
-    final r = await httpClient.get(Uri.parse(baseUrl));
-    return r.body;
-  }
-
-  //
-
-  @protected
-  String get baseUrl => 'https://override-base-url-in-adapter/';
-
-  @protected
-  @visibleForTesting
-  http.Client get httpClient => http.Client();
 }
 
 extension IsarCollectionX<T> on IsarCollection<T> {
@@ -94,4 +87,12 @@ extension IsarCollectionX<T> on IsarCollection<T> {
 
   Query<T> queryByKey(int key) => buildQuery<T>(
       whereClauses: [IdWhereClause.between(lower: key, upper: key)]);
+}
+
+/// A utility class used to return deserialized main [models] AND [included] models.
+class DeserializedData<T extends DataModel<T>> {
+  const DeserializedData(this.models, {this.included = const []});
+  final List<T> models;
+  final List<DataModel> included;
+  T? get model => models.singleOrNull;
 }

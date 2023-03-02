@@ -861,3 +861,20 @@ extension CityQueryProperty on QueryBuilder<City, City, QQueryProperty> {
     });
   }
 }
+
+// **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
+City _$CityFromJson(Map<String, dynamic> json) => City(
+      id: json['id'] as String,
+      name: json['name'] as String?,
+      population: json['population'] as int?,
+    )..yachtKey = json['yachtKey'] as int;
+
+Map<String, dynamic> _$CityToJson(City instance) => <String, dynamic>{
+      'yachtKey': instance.yachtKey,
+      'id': instance.id,
+      'name': instance.name,
+      'population': instance.population,
+    };

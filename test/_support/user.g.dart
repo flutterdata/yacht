@@ -1716,3 +1716,31 @@ extension JobQueryFilter on QueryBuilder<Job, Job, QFilterCondition> {
 }
 
 extension JobQueryObject on QueryBuilder<Job, Job, QFilterCondition> {}
+
+// **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
+User _$UserFromJson(Map<String, dynamic> json) => User(
+      id: json['id'] as String?,
+      name: json['name'] as String?,
+      age: json['age'] as int?,
+      dob: json['dob'] == null ? null : DateTime.parse(json['dob'] as String),
+      priority: $enumDecodeNullable(_$PriorityEnumMap, json['priority']) ??
+          Priority.first,
+    )..yachtKey = json['yachtKey'] as int;
+
+Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
+      'yachtKey': instance.yachtKey,
+      'id': instance.id,
+      'name': instance.name,
+      'age': instance.age,
+      'dob': instance.dob?.toIso8601String(),
+      'priority': _$PriorityEnumMap[instance.priority]!,
+    };
+
+const _$PriorityEnumMap = {
+  Priority.first: 'first',
+  Priority.second: 'second',
+  Priority.third: 'third',
+};
