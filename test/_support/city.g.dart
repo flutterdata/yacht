@@ -863,18 +863,33 @@ extension CityQueryProperty on QueryBuilder<City, City, QQueryProperty> {
 }
 
 // **************************************************************************
-// JsonSerializableGenerator
+// RepositoryGenerator
 // **************************************************************************
 
-City _$CityFromJson(Map<String, dynamic> json) => City(
-      id: json['id'] as String,
-      name: json['name'] as String?,
-      population: json['population'] as int?,
-    )..yachtKey = json['yachtKey'] as int;
+// ignore_for_file: non_constant_identifier_names, duplicate_ignore
 
-Map<String, dynamic> _$CityToJson(City instance) => <String, dynamic>{
-      'yachtKey': instance.yachtKey,
-      'id': instance.id,
-      'name': instance.name,
-      'population': instance.population,
-    };
+mixin $CityRemoteAdapter on RemoteAdapter<City> {}
+
+class CityRemoteAdapter = RemoteAdapter<City> with $CityRemoteAdapter;
+
+//
+
+mixin $CityAdapter on Repository<City> {
+  @override
+  CollectionSchema<City> get schema => CitySchema;
+
+  @override
+  RemoteAdapter<City> get async =>
+      CityRemoteAdapter(repository: this as Repository<City>);
+}
+
+class CityRepository = Repository<City> with $CityAdapter;
+
+//
+
+final citiesRepositoryProvider =
+    Provider<Repository<City>>((ref) => CityRepository(ref));
+
+extension ProviderContainerCityX on ProviderContainer {
+  Repository<City> get cities => read(citiesRepositoryProvider);
+}

@@ -1,0 +1,16 @@
+targets:
+  $default:
+    builders:
+      yacht|data_repository_builder:
+        generate_for:
+          - test/_support/*
+
+builders:
+  data_repository_builder:
+    import: "package:yacht/builders/repository_builder.dart"
+    builder_factories: ["repositoryBuilder"]
+    build_extensions: { ".dart": [".yacht.g.part"] }
+    auto_apply: dependents
+    build_to: cache
+    applies_builders: ["source_gen|combining_builder"]
+    required_inputs: [".freezed.dart"]

@@ -9,7 +9,7 @@ packages:
     source: hosted
     version: "52.0.0"
   analyzer:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: analyzer
       url: "https://pub.dartlang.org"
@@ -37,7 +37,7 @@ packages:
     source: hosted
     version: "2.1.1"
   build:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: build
       url: "https://pub.dartlang.org"
@@ -246,6 +246,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "4.0.2"
+  inflection3:
+    dependency: "direct main"
+    description:
+      name: inflection3
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.5.3+2"
   io:
     dependency: transitive
     description:
@@ -275,19 +282,12 @@ packages:
     source: hosted
     version: "0.6.5"
   json_annotation:
-    dependency: "direct dev"
+    dependency: transitive
     description:
       name: json_annotation
       url: "https://pub.dartlang.org"
     source: hosted
     version: "4.8.0"
-  json_serializable:
-    dependency: "direct dev"
-    description:
-      name: json_serializable
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "6.6.1"
   lints:
     dependency: "direct dev"
     description:
@@ -408,14 +408,14 @@ packages:
     source: hosted
     version: "1.0.3"
   source_gen:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: source_gen
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.2.6"
   source_helper:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: source_helper
       url: "https://pub.dartlang.org"

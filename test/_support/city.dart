@@ -1,7 +1,6 @@
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:equatable/equatable.dart';
 import 'package:isar/isar.dart';
-import 'package:json_annotation/json_annotation.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:yacht/yacht.dart';
 
@@ -11,7 +10,6 @@ part 'city.g.dart';
 
 @Collection(ignore: {'props', 'hashCode', 'stringify'})
 @CopyWith()
-@JsonSerializable()
 class City with DataModel<City>, EquatableMixin {
   @Index()
   @override
@@ -27,19 +25,3 @@ class City with DataModel<City>, EquatableMixin {
 }
 
 class TestCityRepository = CityRepository with TestAdapter;
-
-// gen
-
-mixin CityAdapter on Repository<City> {
-  @override
-  CollectionSchema<City> get schema => CitySchema;
-}
-
-class CityRepository = Repository<City> with CityAdapter;
-
-final cityRepositoryProvider =
-    Provider<Repository<City>>((ref) => CityRepository(ref));
-
-extension ProviderContainerCityX on ProviderContainer {
-  Repository<City> get cities => read(cityRepositoryProvider);
-}

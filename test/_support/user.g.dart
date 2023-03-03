@@ -1718,29 +1718,33 @@ extension JobQueryFilter on QueryBuilder<Job, Job, QFilterCondition> {
 extension JobQueryObject on QueryBuilder<Job, Job, QFilterCondition> {}
 
 // **************************************************************************
-// JsonSerializableGenerator
+// RepositoryGenerator
 // **************************************************************************
 
-User _$UserFromJson(Map<String, dynamic> json) => User(
-      id: json['id'] as String?,
-      name: json['name'] as String?,
-      age: json['age'] as int?,
-      dob: json['dob'] == null ? null : DateTime.parse(json['dob'] as String),
-      priority: $enumDecodeNullable(_$PriorityEnumMap, json['priority']) ??
-          Priority.first,
-    )..yachtKey = json['yachtKey'] as int;
+// ignore_for_file: non_constant_identifier_names, duplicate_ignore
 
-Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
-      'yachtKey': instance.yachtKey,
-      'id': instance.id,
-      'name': instance.name,
-      'age': instance.age,
-      'dob': instance.dob?.toIso8601String(),
-      'priority': _$PriorityEnumMap[instance.priority]!,
-    };
+mixin $UserRemoteAdapter on RemoteAdapter<User> {}
 
-const _$PriorityEnumMap = {
-  Priority.first: 'first',
-  Priority.second: 'second',
-  Priority.third: 'third',
-};
+class UserRemoteAdapter = RemoteAdapter<User> with $UserRemoteAdapter;
+
+//
+
+mixin $UserAdapter on Repository<User> {
+  @override
+  CollectionSchema<User> get schema => UserSchema;
+
+  @override
+  RemoteAdapter<User> get async =>
+      UserRemoteAdapter(repository: this as Repository<User>);
+}
+
+class UserRepository = Repository<User> with $UserAdapter;
+
+//
+
+final usersRepositoryProvider =
+    Provider<Repository<User>>((ref) => UserRepository(ref));
+
+extension ProviderContainerUserX on ProviderContainer {
+  Repository<User> get users => read(usersRepositoryProvider);
+}

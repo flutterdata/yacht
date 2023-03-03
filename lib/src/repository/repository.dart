@@ -1,7 +1,7 @@
 part of yacht;
 
 abstract class Repository<T extends DataModel<T>> = _BaseAdapter<T>
-    with _FinderAdapter<T>, _WatcherAdapter<T>;
+    with _FinderAdapter<T>, _SerializationAdapter<T>, _WatcherAdapter<T>;
 
 abstract class _BaseAdapter<T extends DataModel<T>> {
   /// Give access to the dependency injection system
@@ -23,8 +23,7 @@ abstract class _BaseAdapter<T extends DataModel<T>> {
       Yacht._isar.getCollectionByNameInternal(internalType)
           as IsarCollection<T>;
 
-  _RemoteAdapter get async =>
-      _RemoteAdapter<T>(repository: this as Repository<T>);
+  RemoteAdapter<T> get async;
 }
 
 mixin _FinderAdapter<T extends DataModel<T>> on _BaseAdapter<T> {
@@ -44,6 +43,32 @@ mixin _FinderAdapter<T extends DataModel<T>> on _BaseAdapter<T> {
 
   void clear() =>
       super.collection.isar.writeTxnSync(() => super.collection.clearSync());
+}
+
+mixin _SerializationAdapter<T extends DataModel<T>> on _FinderAdapter<T> {
+  Map<String, dynamic> serialize(T model) {
+    if (model.isNew) {
+      model.save();
+    }
+    final map = collection.queryByKey(model.yachtKey).exportJsonSync().first;
+
+    final links = schema.getLinks(model);
+    map.addAll({
+      for (final link in links)
+        (link as dynamic).linkName.toString(): link is IsarLink
+            ? (link as dynamic).value?.id
+            : (link as dynamic).map((_) => _.id).toList(),
+    });
+    return map
+      ..removeWhere((key, value) => value == null)
+      ..remove('yachtKey')
+      ..remove('hashCode');
+  }
+
+  Future<T> deserialize(Map<String, dynamic> data) async {
+    await collection.isar.writeTxn(() => collection.importJson([data]));
+    return collection.queryById(data['id'].toString()).findAllSync().first;
+  }
 }
 
 mixin _WatcherAdapter<T extends DataModel<T>> on _FinderAdapter<T> {
@@ -87,12 +112,4 @@ extension IsarCollectionX<T> on IsarCollection<T> {
 
   Query<T> queryByKey(int key) => buildQuery<T>(
       whereClauses: [IdWhereClause.between(lower: key, upper: key)]);
-}
-
-/// A utility class used to return deserialized main [models] AND [included] models.
-class DeserializedData<T extends DataModel<T>> {
-  const DeserializedData(this.models, {this.included = const []});
-  final List<T> models;
-  final List<DataModel> included;
-  T? get model => models.singleOrNull;
 }

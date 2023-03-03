@@ -48,24 +48,4 @@ abstract class DataModel<T extends DataModel<T>> {
     yachtKey = model.yachtKey;
     return this as T;
   }
-
-  Map<String, dynamic> toJson() {
-    if (isNew) {
-      save();
-    }
-    final map =
-        repository.collection.queryByKey(yachtKey).exportJsonSync().first;
-
-    final links = repository.schema.getLinks(this as T);
-    map.addAll({
-      for (final link in links)
-        (link as dynamic).linkName.toString(): link is IsarLink
-            ? (link as dynamic).value.id
-            : (link as dynamic).map((_) => _.id).toList(),
-    });
-    return map
-      ..removeWhere((key, value) => value == null)
-      ..remove('yachtKey')
-      ..remove('hashCode');
-  }
 }

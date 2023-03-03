@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:ffi';
 import 'dart:io';
 
@@ -25,14 +26,14 @@ void main() {
     );
 
     final yachtInitializer = Yacht.initialize([
-      userRepositoryProvider,
-      cityRepositoryProvider,
+      usersRepositoryProvider,
+      citiesRepositoryProvider,
     ]);
 
     container = ProviderContainer(
       overrides: [
-        userRepositoryProvider.overrideWith((ref) => TestUserRepository(ref)),
-        cityRepositoryProvider.overrideWith((ref) => TestCityRepository(ref)),
+        usersRepositoryProvider.overrideWith((ref) => TestUserRepository(ref)),
+        citiesRepositoryProvider.overrideWith((ref) => TestCityRepository(ref)),
         yachtHttpClientProvider.overrideWith((ref) {
           return MockClient((req) async {
             final response = ref.watch(testResponseProvider);
@@ -86,7 +87,7 @@ void main() {
 
       expect(zoe.hometown.value!.name, 'London');
 
-      expect(zoe.toJson(), {
+      expect(container.users.serialize(zoe), {
         'id': '1',
         'firstName': 'Zoe',
         'age': 36,
@@ -108,7 +109,7 @@ void main() {
         where: (_) => _.filter().nameContains('don'),
       );
       expect(citiesFilter, hasLength(1));
-      expect(citiesFilter.first.toJson(), {
+      expect(container.cities.serialize(citiesFilter.first), {
         'id': '9',
         'name': 'London',
       });
@@ -118,9 +119,14 @@ void main() {
     });
 
     test('remote', () async {
+      final u1 = User(id: '1', name: 'Jane', age: 36).save();
+      final map = container.users.serialize(u1);
+      map['id'] = '2';
+
       container.read(testResponseProvider.notifier).state =
-          TestResponse.text('{"id": 1}');
-      await container.cities.async.findOne('1');
+          TestResponse.text(jsonEncode(map));
+      final u2 = await container.users.async.findOne('2');
+      expect(u2!.id, '2');
     });
   });
 

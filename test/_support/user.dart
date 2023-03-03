@@ -1,7 +1,6 @@
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:equatable/equatable.dart';
 import 'package:isar/isar.dart';
-import 'package:json_annotation/json_annotation.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:yacht/yacht.dart';
 
@@ -12,7 +11,6 @@ part 'user.g.dart';
 
 @Collection(ignore: {'props', 'hashCode', 'stringify'})
 @CopyWith()
-@JsonSerializable()
 class User with DataModel<User>, EquatableMixin {
   @Index()
   @override
@@ -24,7 +22,6 @@ class User with DataModel<User>, EquatableMixin {
   final DateTime? dob;
   @Enumerated(EnumType.name)
   final Priority priority;
-  @JsonKey(includeFromJson: false)
   final Job? job;
 
   // relationships
@@ -66,19 +63,3 @@ class Job {
 }
 
 class TestUserRepository = UserRepository with TestAdapter;
-
-// gen
-
-mixin UserAdapter on Repository<User> {
-  @override
-  CollectionSchema<User> get schema => UserSchema;
-}
-
-class UserRepository = Repository<User> with UserAdapter;
-
-final userRepositoryProvider =
-    Provider<Repository<User>>((ref) => UserRepository(ref));
-
-extension ProviderContainerUserX on ProviderContainer {
-  Repository<User> get users => read(userRepositoryProvider);
-}
