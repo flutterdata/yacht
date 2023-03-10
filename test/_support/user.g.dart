@@ -1723,27 +1723,17 @@ extension JobQueryObject on QueryBuilder<Job, Job, QFilterCondition> {}
 
 // ignore_for_file: non_constant_identifier_names, duplicate_ignore
 
-mixin $UserRemoteAdapter on RemoteAdapter<User> {}
-
-class UserRemoteAdapter = RemoteAdapter<User> with $UserRemoteAdapter;
-
-//
-
 mixin $UserAdapter on Repository<User> {
   @override
   CollectionSchema<User> get schema => UserSchema;
-
-  @override
-  RemoteAdapter<User> get async =>
-      UserRemoteAdapter(repository: this as Repository<User>);
 }
 
-class UserRepository = Repository<User> with $UserAdapter;
+class UsersRepository = Repository<User> with $UserAdapter;
 
 //
 
 final usersRepositoryProvider =
-    Provider<Repository<User>>((ref) => UserRepository(ref));
+    Provider<Repository<User>>((ref) => UsersRepository(ref));
 
 extension ProviderContainerUserX on ProviderContainer {
   Repository<User> get users => read(usersRepositoryProvider);

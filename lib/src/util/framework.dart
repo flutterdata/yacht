@@ -40,6 +40,8 @@ extension StringUtilsX on String {
 
   String decapitalize() =>
       isEmpty ? '' : '${this[0].toLowerCase()}${substring(1)}';
+
+  String pluralize() => inflection.pluralize(this);
 }
 
 extension IterableNullX<T> on Iterable<T?> {

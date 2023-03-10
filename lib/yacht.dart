@@ -5,6 +5,7 @@ import 'dart:convert';
 
 import 'package:equatable/equatable.dart';
 import 'package:http/http.dart' as http;
+import 'package:inflection3/inflection3.dart' as inflection;
 import 'package:isar/isar.dart' hide collection;
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path_helper;

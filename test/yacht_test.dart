@@ -16,6 +16,15 @@ import '_support/user.dart';
 void main() {
   late ProviderContainer container;
   Function? dispose;
+  final zoe = User(
+    id: '1',
+    name: 'Zoe',
+    dob: DateTime.utc(1987, 1, 17),
+    job: Job()
+      ..employer = 'self'
+      ..title = 'engineer',
+    age: 36,
+  );
 
   setUpAll(() async {
     // needed for tests
@@ -32,16 +41,9 @@ void main() {
 
     container = ProviderContainer(
       overrides: [
-        usersRepositoryProvider.overrideWith((ref) => TestUserRepository(ref)),
-        citiesRepositoryProvider.overrideWith((ref) => TestCityRepository(ref)),
-        yachtHttpClientProvider.overrideWith((ref) {
-          return MockClient((req) async {
-            final response = ref.watch(testResponseProvider);
-            final text = await response.callback(req);
-            return http.Response(text, response.statusCode,
-                headers: response.headers);
-          });
-        }),
+        usersRepositoryProvider.overrideWith((ref) => TestUsersRepository(ref)),
+        citiesRepositoryProvider
+            .overrideWith((ref) => TestCitiesRepository(ref)),
       ],
     );
 
@@ -59,22 +61,14 @@ void main() {
   });
 
   group('basic', () {
-    test('save, find, serialize', () async {
+    test('save, find', () async {
       final u1 = User(id: '1', name: 'Jane', age: 36);
 
       expect(u1.isNew, isTrue);
       u1.save();
       expect(u1.isNew, isFalse);
 
-      final zoe = User(
-              id: '1',
-              name: 'Zoe',
-              dob: DateTime.utc(1987, 1, 17),
-              job: Job()
-                ..employer = 'self'
-                ..title = 'engineer',
-              age: 36)
-          .save();
+      zoe.save();
 
       expect(u1.yachtKey, zoe.yachtKey);
       expect(zoe.yachtKey, zoe.reload()!.yachtKey);
@@ -82,12 +76,16 @@ void main() {
       final existingUser = container.users.findOne('1');
       expect(existingUser!.name, 'Zoe');
 
+      zoe.delete();
+
+      expect(zoe.reload(), isNull);
+    });
+
+    test('serialization', () async {
       zoe.hometown.value = City(id: '9', name: 'London').save();
       zoe.bucketList.addAll([City(id: '92', name: 'Jakarta').save()]);
 
-      expect(zoe.hometown.value!.name, 'London');
-
-      expect(container.users.serialize(zoe), {
+      final zoeMap = {
         'id': '1',
         'firstName': 'Zoe',
         'age': 36,
@@ -96,11 +94,17 @@ void main() {
         'priority': 'first',
         'hometown': '9',
         'bucketList': ['92'],
-      });
+      };
 
-      zoe.delete();
+      expect(await container.users.serialize(zoe), zoeMap);
+      expect(await container.users.deserialize(zoeMap), zoe);
+    });
 
-      expect(zoe.reload(), isNull);
+    test('relationship, query, raw', () async {
+      zoe.hometown.value = City(id: '9', name: 'London').save();
+      zoe.bucketList.addAll([City(id: '92', name: 'Jakarta').save()]);
+
+      expect(zoe.hometown.value!.name, 'London');
 
       final cities = container.cities.findAll();
       expect(cities, hasLength(2));
@@ -109,7 +113,7 @@ void main() {
         where: (_) => _.filter().nameContains('don'),
       );
       expect(citiesFilter, hasLength(1));
-      expect(container.cities.serialize(citiesFilter.first), {
+      expect(await container.cities.serialize(citiesFilter.first), {
         'id': '9',
         'name': 'London',
       });
@@ -120,12 +124,12 @@ void main() {
 
     test('remote', () async {
       final u1 = User(id: '1', name: 'Jane', age: 36).save();
-      final map = container.users.serialize(u1);
+      final map = await container.users.serialize(u1);
       map['id'] = '2';
 
       container.read(testResponseProvider.notifier).state =
           TestResponse.text(jsonEncode(map));
-      final u2 = await container.users.async.findOne('2');
+      final u2 = await container.users.asyncFindOne('2');
       expect(u2!.id, '2');
     });
   });
@@ -226,6 +230,9 @@ class TestResponse {
 
   factory TestResponse.text(String text) => TestResponse((_) async => text);
 }
+
+class TestUsersRepository = UsersRepository with TestAdapter;
+class TestCitiesRepository = CitiesRepository with TestAdapter;
 
 mixin TestAdapter<T extends DataModel<T>> on Repository<T> {
   http.Client get httpClient {

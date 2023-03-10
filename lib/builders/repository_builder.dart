@@ -1,6 +1,5 @@
 import 'package:analyzer/dart/element/element.dart';
 import 'package:build/build.dart';
-import 'package:inflection3/inflection3.dart' as inflection;
 import 'package:isar/isar.dart';
 import 'package:source_gen/source_gen.dart';
 import 'package:yacht/yacht.dart';
@@ -13,7 +12,8 @@ class RepositoryGenerator extends GeneratorForAnnotation<Collection> {
   Future<String> generateForAnnotatedElement(
       Element element, ConstantReader annotation, BuildStep buildStep) async {
     final className = element.name!;
-    final classNameLower = inflection.pluralize(className.decapitalize());
+    final classNameLower = className.decapitalize().pluralize();
+    final classNamePlural = className.toString().pluralize();
     // ClassElement classElement = element as ClassElement;
 
     // final hasFromJson =
@@ -34,26 +34,17 @@ class RepositoryGenerator extends GeneratorForAnnotation<Collection> {
     return '''
 // ignore_for_file: non_constant_identifier_names, duplicate_ignore
 
-mixin \$${className}RemoteAdapter on RemoteAdapter<$className> {}
-
-class ${className}RemoteAdapter = RemoteAdapter<$className> with \$${className}RemoteAdapter;
-
-//
-
 mixin \$${className}Adapter on Repository<$className> {
   @override
   CollectionSchema<$className> get schema => ${className}Schema;
-
-  @override
-  RemoteAdapter<$className> get async => ${className}RemoteAdapter(repository: this as Repository<$className>);
 }
 
-class ${className}Repository = Repository<$className> with \$${className}Adapter;
+class ${classNamePlural}Repository = Repository<$className> with \$${className}Adapter;
 
 //
 
 final ${classNameLower}RepositoryProvider =
-    Provider<Repository<$className>>((ref) => ${className}Repository(ref));
+    Provider<Repository<$className>>((ref) => ${classNamePlural}Repository(ref));
 
 extension ProviderContainer${className}X on ProviderContainer {
   Repository<$className> get $classNameLower => read(${classNameLower}RepositoryProvider);

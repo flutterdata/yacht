@@ -1,7 +1,11 @@
 part of yacht;
 
 abstract class Repository<T extends DataModel<T>> = _BaseAdapter<T>
-    with _FinderAdapter<T>, _SerializationAdapter<T>, _WatcherAdapter<T>;
+    with
+        _FinderAdapter<T>,
+        _SerializationAdapter<T>,
+        _RemoteAdapter<T>,
+        _WatcherAdapter<T>;
 
 abstract class _BaseAdapter<T extends DataModel<T>> {
   /// Give access to the dependency injection system
@@ -22,8 +26,6 @@ abstract class _BaseAdapter<T extends DataModel<T>> {
       // ignore: invalid_use_of_protected_member
       Yacht._isar.getCollectionByNameInternal(internalType)
           as IsarCollection<T>;
-
-  RemoteAdapter<T> get async;
 }
 
 mixin _FinderAdapter<T extends DataModel<T>> on _BaseAdapter<T> {
@@ -46,10 +48,9 @@ mixin _FinderAdapter<T extends DataModel<T>> on _BaseAdapter<T> {
 }
 
 mixin _SerializationAdapter<T extends DataModel<T>> on _FinderAdapter<T> {
-  Map<String, dynamic> serialize(T model) {
-    if (model.isNew) {
-      model.save();
-    }
+  Future<Map<String, dynamic>> serialize(T model) async {
+    model.save();
+
     final map = collection.queryByKey(model.yachtKey).exportJsonSync().first;
 
     final links = schema.getLinks(model);

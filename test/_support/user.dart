@@ -4,10 +4,11 @@ import 'package:isar/isar.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:yacht/yacht.dart';
 
-import '../yacht_test.dart';
 import 'city.dart';
 
 part 'user.g.dart';
+
+mixin RemoteSoreteAdapter<T extends DataModel<T>> on Repository<T> {}
 
 @Collection(ignore: {'props', 'hashCode', 'stringify'})
 @CopyWith()
@@ -61,5 +62,3 @@ class Job {
   late String title;
   late String employer;
 }
-
-class TestUserRepository = UserRepository with TestAdapter;

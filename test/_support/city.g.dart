@@ -868,27 +868,17 @@ extension CityQueryProperty on QueryBuilder<City, City, QQueryProperty> {
 
 // ignore_for_file: non_constant_identifier_names, duplicate_ignore
 
-mixin $CityRemoteAdapter on RemoteAdapter<City> {}
-
-class CityRemoteAdapter = RemoteAdapter<City> with $CityRemoteAdapter;
-
-//
-
 mixin $CityAdapter on Repository<City> {
   @override
   CollectionSchema<City> get schema => CitySchema;
-
-  @override
-  RemoteAdapter<City> get async =>
-      CityRemoteAdapter(repository: this as Repository<City>);
 }
 
-class CityRepository = Repository<City> with $CityAdapter;
+class CitiesRepository = Repository<City> with $CityAdapter;
 
 //
 
 final citiesRepositoryProvider =
-    Provider<Repository<City>>((ref) => CityRepository(ref));
+    Provider<Repository<City>>((ref) => CitiesRepository(ref));
 
 extension ProviderContainerCityX on ProviderContainer {
   Repository<City> get cities => read(citiesRepositoryProvider);
