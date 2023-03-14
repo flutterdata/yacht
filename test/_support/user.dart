@@ -1,17 +1,15 @@
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:equatable/equatable.dart';
 import 'package:isar/isar.dart';
-import 'package:riverpod/riverpod.dart';
 import 'package:yacht/yacht.dart';
 
 import 'city.dart';
 
 part 'user.g.dart';
 
-mixin RemoteSoreteAdapter<T extends DataModel<T>> on Repository<T> {}
-
 @Collection(ignore: {'props', 'hashCode', 'stringify'})
 @CopyWith()
+@DataRepository([])
 class User with DataModel<User>, EquatableMixin {
   @Index()
   @override

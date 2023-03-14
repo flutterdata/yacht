@@ -11,6 +11,9 @@ import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path_helper;
 import 'package:riverpod/riverpod.dart';
 
+// export external packages
+export 'package:riverpod/riverpod.dart' hide Family;
+
 part 'src/data_model.dart';
 part 'src/repository/remote_adapter.dart';
 part 'src/repository/repository.dart';

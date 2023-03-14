@@ -873,7 +873,8 @@ mixin $CityAdapter on Repository<City> {
   CollectionSchema<City> get schema => CitySchema;
 }
 
-class CitiesRepository = Repository<City> with $CityAdapter;
+class CitiesRepository = Repository<City>
+    with $CityAdapter, NothingSerializer<City>;
 
 //
 

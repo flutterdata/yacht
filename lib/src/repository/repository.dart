@@ -114,3 +114,8 @@ extension IsarCollectionX<T> on IsarCollection<T> {
   Query<T> queryByKey(int key) => buildQuery<T>(
       whereClauses: [IdWhereClause.between(lower: key, upper: key)]);
 }
+
+class DataRepository {
+  final List<Type> adapters;
+  const DataRepository(this.adapters);
+}
