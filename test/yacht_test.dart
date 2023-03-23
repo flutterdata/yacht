@@ -6,7 +6,6 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:isar/isar.dart';
 import 'package:mockito/mockito.dart';
-import 'package:riverpod/riverpod.dart';
 import 'package:test/test.dart';
 import 'package:yacht/yacht.dart';
 
@@ -61,16 +60,36 @@ void main() {
   });
 
   group('basic', () {
-    test('save, find', () async {
-      final u1 = User(id: '1', name: 'Jane', age: 36);
+    test('keys', () {
+      expect(User(id: '1').yachtKey, zoe.yachtKey);
 
-      expect(u1.isNew, isTrue);
-      u1.save();
-      expect(u1.isNew, isFalse);
+      final u1 = User(name: 'Jane', age: 36);
+      final u2 = u1.copyWith(id: '2').andKeyFrom(u1);
+      final u3 = User(id: '3').save();
+
+      expect(User(id: '2').yachtKey, u2.yachtKey);
+
+      // can't reassign key to a model with different ID
+      expect(() => User(id: '92').andKeyFrom(User(id: '3')),
+          throwsA(isA<UnsupportedError>()));
+
+      expect(
+          kIdMapping.values.toSet(), {zoe.yachtKey, u2.yachtKey, u3.yachtKey});
+    });
+
+    test('save, keys, reload, find', () async {
+      final u1 = User(name: 'Jane', age: 36).save();
 
       zoe.save();
 
-      expect(u1.yachtKey, zoe.yachtKey);
+      expect(() => u1.copyWith(id: '1').andKeyFrom(u1),
+          throwsA(isA<UnsupportedError>()));
+
+      final u2 = u1.copyWith(id: '1');
+
+      // as u2 has ID=1, then it should now have the same key as zoe
+      expect(u2.yachtKey, zoe.yachtKey);
+
       expect(zoe.yachtKey, zoe.reload()!.yachtKey);
 
       final existingUser = container.users.findOne('1');
@@ -120,6 +139,30 @@ void main() {
 
       // access raw isar
       expect(container.cities.collection.isar.citys.countSync(), 2);
+    });
+
+    test('relationship associations', () async {
+      final targetCollection = container.cities.collection;
+      final sourceCollection = container.users.collection;
+
+      // ignore: invalid_use_of_protected_member
+      container.users.schema.attach(sourceCollection, zoe.yachtKey, zoe);
+
+      zoe.save();
+
+      final hometownKey = 9999;
+
+      zoe.hometown
+          // ignore: invalid_use_of_protected_member
+          .attach(sourceCollection, targetCollection, 'hometown', hometownKey);
+
+      final city = City(id: '9', name: 'London').save();
+      print(city.yachtKey);
+
+      zoe.hometown.loadSync();
+      print(container.users.findAll());
+
+      print(zoe.hometown.value);
     });
 
     test('remote', () async {

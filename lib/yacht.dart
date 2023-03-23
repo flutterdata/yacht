@@ -10,6 +10,7 @@ import 'package:isar/isar.dart' hide collection;
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path_helper;
 import 'package:riverpod/riverpod.dart';
+import 'package:uuid/uuid.dart' as uuid;
 
 // export external packages
 export 'package:riverpod/riverpod.dart' hide Family;

@@ -1,19 +1,29 @@
 part of yacht;
 
+final kIdMapping = <Object, int>{};
+
 abstract class DataModel<T extends DataModel<T>> {
-  Id _key = Isar.autoIncrement;
-  Id get yachtKey => _key;
+  static final _uuid = uuid.Uuid();
+
+  Id _key = _fastHash(_uuid.v1().substring(0, 8));
+
+  Id get yachtKey {
+    if (id != null) {
+      return kIdMapping[id!] ??= _key;
+    }
+    return _key;
+  }
+
   @protected
-  set yachtKey(Id value) => _key = value;
+  set yachtKey(Id value) {
+    _key = value;
+  }
 
   Object? get id;
 
   Isar get _isar => repository.collection.isar;
 
   String get _internalType => T.toString();
-
-  @ignore
-  bool get isNew => yachtKey == Isar.autoIncrement;
 
   @ignore
   bool get isSaved => repository.exists(id!);
@@ -27,10 +37,7 @@ abstract class DataModel<T extends DataModel<T>> {
   }
 
   T save() {
-    if (isNew && id != null && isSaved) {
-      this.yachtKey = repository.findOne(id!)!.yachtKey;
-    }
-    this.yachtKey = _isar.writeTxnSync(() {
+    _isar.writeTxnSync(() {
       return repository.collection.putSync(this as T);
     });
     return this as T;
@@ -45,7 +52,31 @@ abstract class DataModel<T extends DataModel<T>> {
   }
 
   T andKeyFrom(T model) {
+    if (model.id != null && id != model.id) {
+      throw UnsupportedError(
+          'Cannot assign key for ID=${model.id} to target ID=$id');
+    }
+    if (id != null && kIdMapping[id!] != null) {
+      throw UnsupportedError(
+          'Cannot assign key to target with ID=$id that already has a key');
+    }
     yachtKey = model.yachtKey;
     return this as T;
   }
+}
+
+/// FNV-1a 64bit hash algorithm optimized for Dart Strings
+int _fastHash(String string) {
+  var hash = 0xcbf29ce484222325;
+
+  var i = 0;
+  while (i < string.length) {
+    final codeUnit = string.codeUnitAt(i++);
+    hash ^= codeUnit >> 8;
+    hash *= 0x100000001b3;
+    hash ^= codeUnit & 0xFF;
+    hash *= 0x100000001b3;
+  }
+
+  return hash;
 }
