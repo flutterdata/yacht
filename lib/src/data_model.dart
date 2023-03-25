@@ -1,17 +1,17 @@
 part of yacht;
 
-final kIdMapping = <Object, int>{};
-
 abstract class DataModel<T extends DataModel<T>> {
   static final _uuid = uuid.Uuid();
 
-  Id _key = _fastHash(_uuid.v1().substring(0, 8));
+  Id? _key;
 
   Id get yachtKey {
     if (id != null) {
-      return kIdMapping[id!] ??= _key;
+      _key = _fastHash(id!.toString());
+    } else {
+      _key ??= _fastHash(_uuid.v1().substring(0, 8));
     }
-    return _key;
+    return _key!;
   }
 
   @protected
@@ -33,7 +33,7 @@ abstract class DataModel<T extends DataModel<T>> {
       Yacht.repositories[_internalType] as Repository<T>;
 
   T? reload() {
-    return _isar.writeTxnSync(() => repository.collection.getSync(yachtKey));
+    return repository.collection.getSync(yachtKey);
   }
 
   T save() {
@@ -49,19 +49,6 @@ abstract class DataModel<T extends DataModel<T>> {
     if (result == false) {
       throw Exception('Could not delete $this');
     }
-  }
-
-  T andKeyFrom(T model) {
-    if (model.id != null && id != model.id) {
-      throw UnsupportedError(
-          'Cannot assign key for ID=${model.id} to target ID=$id');
-    }
-    if (id != null && kIdMapping[id!] != null) {
-      throw UnsupportedError(
-          'Cannot assign key to target with ID=$id that already has a key');
-    }
-    yachtKey = model.yachtKey;
-    return this as T;
   }
 }
 
