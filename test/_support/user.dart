@@ -10,7 +10,7 @@ part 'user.g.dart';
 @Collection(ignore: {'props', 'hashCode', 'stringify'})
 @CopyWith()
 @DataRepository([])
-class User with DataModel<User>, EquatableMixin {
+class User extends DataModel<User> with EquatableMixin {
   @override
   final String? id;
 
@@ -23,8 +23,9 @@ class User with DataModel<User>, EquatableMixin {
   final Job? job;
 
   // relationships
-  final hometown = IsarLink<City>();
-  final bucketList = IsarLinks<City>();
+  @ignore
+  final hometown = BelongsTo<City>();
+  // final bucketList = IsarLinks<City>();
 
   User({
     this.id,

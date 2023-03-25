@@ -12,7 +12,10 @@ class Yacht {
     }
 
     final _repositories = repositoryProviders.map(ref.read);
-    final schemas = _repositories.map((r) => r._schema).toList();
+    final schemas = [
+      metaSchema,
+      ..._repositories.map((r) => r._schema).toList(),
+    ];
 
     repositories = {
       for (final repository in _repositories)
@@ -20,6 +23,9 @@ class Yacht {
     };
 
     _isar = await Isar.open(schemas, name: 'yacht', inspector: false);
+
+    // TODO tmp
+    _isar.writeTxnSync(() => _isar.collection<Meta>().clearSync());
   });
 
   static void clear() {

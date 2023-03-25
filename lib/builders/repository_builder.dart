@@ -57,6 +57,9 @@ class RepositoryGenerator extends GeneratorForAnnotation<DataRepository> {
 mixin \$${className}Adapter on Repository<$className> {
   @override
   CollectionSchema<$className> get schema => ${className}Schema;
+
+  @override
+  List<BelongsTo> Function($className) get relationships => (_) => [_.hometown];
 }
 
 class ${classNamePlural}Repository = Repository<$className> with \$${className}Adapter${mixins.map((e) => ', $e').join()};

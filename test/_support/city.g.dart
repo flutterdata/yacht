@@ -175,7 +175,6 @@ City _cityDeserialize(
     name: reader.readStringOrNull(offsets[1]),
     population: reader.readLongOrNull(offsets[2]),
   );
-  object.yachtKey = id;
   return object;
 }
 
@@ -205,9 +204,7 @@ List<IsarLinkBase<dynamic>> _cityGetLinks(City object) {
   return [];
 }
 
-void _cityAttach(IsarCollection<dynamic> col, Id id, City object) {
-  object.yachtKey = id;
-}
+void _cityAttach(IsarCollection<dynamic> col, Id id, City object) {}
 
 extension CityQueryWhereSort on QueryBuilder<City, City, QWhere> {
   QueryBuilder<City, City, QAfterWhere> anyYachtKey() {
@@ -871,6 +868,9 @@ extension CityQueryProperty on QueryBuilder<City, City, QQueryProperty> {
 mixin $CityAdapter on Repository<City> {
   @override
   CollectionSchema<City> get schema => CitySchema;
+
+  @override
+  List<BelongsTo> Function(City) get relationships => (_) => [];
 }
 
 class CitiesRepository = Repository<City>

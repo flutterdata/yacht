@@ -26,6 +26,9 @@ abstract class _BaseAdapter<T extends DataModel<T>> {
       // ignore: invalid_use_of_protected_member
       Yacht._isar.getCollectionByNameInternal(internalType)
           as IsarCollection<T>;
+
+  @protected
+  List<BelongsTo> Function(T) get relationships;
 }
 
 mixin _FinderAdapter<T extends DataModel<T>> on _BaseAdapter<T> {

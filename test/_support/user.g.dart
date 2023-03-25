@@ -165,20 +165,7 @@ const UserSchema = CollectionSchema(
   deserializeProp: _userDeserializeProp,
   idName: r'yachtKey',
   indexes: {},
-  links: {
-    r'hometown': LinkSchema(
-      id: -6460337970129397196,
-      name: r'hometown',
-      target: r'City',
-      single: true,
-    ),
-    r'bucketList': LinkSchema(
-      id: -5792051816250112667,
-      name: r'bucketList',
-      target: r'City',
-      single: false,
-    )
-  },
+  links: {},
   embeddedSchemas: {r'Job': JobSchema},
   getId: _userGetId,
   getLinks: _userGetLinks,
@@ -253,7 +240,6 @@ User _userDeserialize(
     priority: _UserpriorityValueEnumMap[reader.readStringOrNull(offsets[5])] ??
         Priority.first,
   );
-  object.yachtKey = id;
   return object;
 }
 
@@ -302,14 +288,10 @@ Id _userGetId(User object) {
 }
 
 List<IsarLinkBase<dynamic>> _userGetLinks(User object) {
-  return [object.hometown, object.bucketList];
+  return [];
 }
 
-void _userAttach(IsarCollection<dynamic> col, Id id, User object) {
-  object.yachtKey = id;
-  object.hometown.attach(col, col.isar.collection<City>(), r'hometown', id);
-  object.bucketList.attach(col, col.isar.collection<City>(), r'bucketList', id);
-}
+void _userAttach(IsarCollection<dynamic> col, Id id, User object) {}
 
 extension UserQueryWhereSort on QueryBuilder<User, User, QWhere> {
   QueryBuilder<User, User, QAfterWhere> anyYachtKey() {
@@ -1017,76 +999,7 @@ extension UserQueryObject on QueryBuilder<User, User, QFilterCondition> {
   }
 }
 
-extension UserQueryLinks on QueryBuilder<User, User, QFilterCondition> {
-  QueryBuilder<User, User, QAfterFilterCondition> hometown(
-      FilterQuery<City> q) {
-    return QueryBuilder.apply(this, (query) {
-      return query.link(q, r'hometown');
-    });
-  }
-
-  QueryBuilder<User, User, QAfterFilterCondition> hometownIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'hometown', 0, true, 0, true);
-    });
-  }
-
-  QueryBuilder<User, User, QAfterFilterCondition> bucketList(
-      FilterQuery<City> q) {
-    return QueryBuilder.apply(this, (query) {
-      return query.link(q, r'bucketList');
-    });
-  }
-
-  QueryBuilder<User, User, QAfterFilterCondition> bucketListLengthEqualTo(
-      int length) {
-    return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'bucketList', length, true, length, true);
-    });
-  }
-
-  QueryBuilder<User, User, QAfterFilterCondition> bucketListIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'bucketList', 0, true, 0, true);
-    });
-  }
-
-  QueryBuilder<User, User, QAfterFilterCondition> bucketListIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'bucketList', 0, false, 999999, true);
-    });
-  }
-
-  QueryBuilder<User, User, QAfterFilterCondition> bucketListLengthLessThan(
-    int length, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'bucketList', 0, true, length, include);
-    });
-  }
-
-  QueryBuilder<User, User, QAfterFilterCondition> bucketListLengthGreaterThan(
-    int length, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'bucketList', length, include, 999999, true);
-    });
-  }
-
-  QueryBuilder<User, User, QAfterFilterCondition> bucketListLengthBetween(
-    int lower,
-    int upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.linkLength(
-          r'bucketList', lower, includeLower, upper, includeUpper);
-    });
-  }
-}
+extension UserQueryLinks on QueryBuilder<User, User, QFilterCondition> {}
 
 extension UserQuerySortBy on QueryBuilder<User, User, QSortBy> {
   QueryBuilder<User, User, QAfterSortBy> sortByAge() {
@@ -1649,6 +1562,9 @@ extension JobQueryObject on QueryBuilder<Job, Job, QFilterCondition> {}
 mixin $UserAdapter on Repository<User> {
   @override
   CollectionSchema<User> get schema => UserSchema;
+
+  @override
+  List<BelongsTo> Function(User) get relationships => (_) => [_.hometown];
 }
 
 class UsersRepository = Repository<User> with $UserAdapter;

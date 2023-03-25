@@ -3,21 +3,26 @@ part of yacht;
 abstract class DataModel<T extends DataModel<T>> {
   static final _uuid = uuid.Uuid();
 
-  Id? _key;
+  static Id getKeyForId(Object id) => _fastHash(id.toString());
 
-  Id get yachtKey {
+  late final Id _key;
+
+  DataModel() {
     if (id != null) {
-      _key = _fastHash(id!.toString());
+      _key = getKeyForId(id!);
     } else {
-      _key ??= _fastHash(_uuid.v1().substring(0, 8));
+      _key = _fastHash(_uuid.v1().substring(0, 8));
     }
-    return _key!;
+    // init relationships
+    for (final rel in repository.relationships(this as T)) {
+      rel.init(this as T, 'hometown');
+    }
   }
 
-  @protected
-  set yachtKey(Id value) {
-    _key = value;
-  }
+  Id get yachtKey => _key;
+
+  // @protected
+  // set yachtKey(Id value) => _key = value;
 
   Object? get id;
 

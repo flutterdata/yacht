@@ -8,7 +8,7 @@ part 'city.g.dart';
 @Collection(ignore: {'props', 'hashCode', 'stringify'})
 @CopyWith()
 @DataRepository([NothingSerializer])
-class City with DataModel<City>, EquatableMixin {
+class City extends DataModel<City> with EquatableMixin {
   @Index()
   @override
   final String id;

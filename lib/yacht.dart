@@ -18,6 +18,10 @@ export 'package:riverpod/riverpod.dart' hide Family;
 part 'src/data_model.dart';
 part 'src/repository/remote_adapter.dart';
 part 'src/repository/repository.dart';
+
+part 'src/relationships/belongs_to.dart';
+
 part 'src/util/data.dart';
 part 'src/util/framework.dart';
+part 'src/util/meta.dart';
 part 'src/util/notifier.dart';
