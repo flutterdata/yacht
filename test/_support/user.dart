@@ -11,7 +11,6 @@ part 'user.g.dart';
 @CopyWith()
 @DataRepository([])
 class User with DataModel<User>, EquatableMixin {
-  @Index()
   @override
   final String? id;
 

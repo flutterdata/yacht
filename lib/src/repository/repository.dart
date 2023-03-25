@@ -107,9 +107,16 @@ mixin _WatcherAdapter<T extends DataModel<T>> on _FinderAdapter<T> {
 }
 
 extension IsarCollectionX<T> on IsarCollection<T> {
-  Query<T> queryById(Object id) => buildQuery<T>(whereClauses: [
-        IndexWhereClause.equalTo(indexName: 'id', value: [id])
-      ]);
+  Query<T> queryById(Object id) {
+    final hasIndex = schema.indexes[r'id'] != null;
+    return buildQuery<T>(
+      whereClauses: [
+        if (hasIndex) IndexWhereClause.equalTo(indexName: 'id', value: [id])
+      ],
+      filter: FilterGroup.and(
+          [if (!hasIndex) FilterCondition.equalTo(property: r'id', value: id)]),
+    );
+  }
 
   Query<T> queryByKey(int key) => buildQuery<T>(
       whereClauses: [IdWhereClause.between(lower: key, upper: key)]);

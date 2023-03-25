@@ -18,9 +18,12 @@ void main() {
 
   setUpAll(() async {
     // needed for tests
+    final path = File('test/_support/libisar.dylib').absolute.path;
     await Isar.initializeIsarCore(
       libraries: {
-        Abi.macosX64: File('test/_support/libisar.dylib').absolute.path,
+        Abi.macosX64: path,
+        Abi.macosArm64: path,
+        Abi.androidArm64: path,
       },
     );
 
