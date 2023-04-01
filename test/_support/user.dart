@@ -7,7 +7,8 @@ import 'city.dart';
 
 part 'user.g.dart';
 
-@Collection(ignore: {'props', 'hashCode', 'stringify'})
+@Collection(
+    ignore: {'props', 'hashCode', 'stringify', 'hometown', 'bucketList'})
 @CopyWith()
 @DataRepository([])
 class User extends DataModel<User> with EquatableMixin {
@@ -23,9 +24,8 @@ class User extends DataModel<User> with EquatableMixin {
   final Job? job;
 
   // relationships
-  @ignore
   final hometown = BelongsTo<City>();
-  // final bucketList = IsarLinks<City>();
+  final bucketList = HasMany<City>();
 
   User({
     this.id,

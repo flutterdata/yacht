@@ -116,11 +116,17 @@ void main() {
           ..employer = 'self'
           ..title = 'engineer',
         age: 36,
-      );
+      ).init();
+
+      final j = City(id: '92', name: 'Jakarta').save();
       zoe.hometown.value = City(id: '9', name: 'London').save();
-      // zoe.bucketList.addAll([City(id: '92', name: 'Jakarta').save()]);
+      zoe.bucketList.add(j);
 
       expect(zoe.hometown.value!.name, 'London');
+      expect(zoe.bucketList.toSet(), {j});
+
+      zoe.bucketList.remove(j);
+      expect(zoe.bucketList.toSet(), <City>{});
 
       final cities = container.cities.findAll();
       expect(cities, hasLength(2));

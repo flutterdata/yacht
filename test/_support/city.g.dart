@@ -869,8 +869,11 @@ mixin $CityAdapter on Repository<City> {
   @override
   CollectionSchema<City> get schema => CitySchema;
 
+  static final Map<String, RelationshipMeta> _kCityRelationshipMetas = {};
+
   @override
-  List<BelongsTo> Function(City) get relationships => (_) => [];
+  Map<String, RelationshipMeta> get relationshipMetas =>
+      _kCityRelationshipMetas;
 }
 
 class CitiesRepository = Repository<City>

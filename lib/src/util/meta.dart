@@ -6,9 +6,14 @@ class Meta {
   @Index(type: IndexType.value)
   final String relId;
 
-  final int value;
+  final List<int> value;
 
   Meta({required this.relId, required this.value});
+
+  @override
+  String toString() {
+    return '<Meta>{relId: $relId, value: [${value.join(', ')}]}';
+  }
 }
 
 const metaSchema = CollectionSchema(
@@ -23,7 +28,7 @@ const metaSchema = CollectionSchema(
     r'value': PropertySchema(
       id: 1,
       name: r'value',
-      type: IsarType.long,
+      type: IsarType.longList,
     )
   },
   estimateSize: _metaEstimateSize,
@@ -35,8 +40,8 @@ const metaSchema = CollectionSchema(
     r'relId': IndexSchema(
       id: 9041799437181632716,
       name: r'relId',
-      unique: false,
-      replace: false,
+      unique: true,
+      replace: true,
       properties: [
         IndexPropertySchema(
           name: r'relId',
@@ -61,6 +66,7 @@ int _metaEstimateSize(
 ) {
   var bytesCount = offsets.last;
   bytesCount += 3 + object.relId.length * 3;
+  bytesCount += 3 + object.value.length * 8;
   return bytesCount;
 }
 
@@ -71,7 +77,7 @@ void _metaSerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeString(offsets[0], object.relId);
-  writer.writeLong(offsets[1], object.value);
+  writer.writeLongList(offsets[1], object.value);
 }
 
 Meta _metaDeserialize(
@@ -82,7 +88,7 @@ Meta _metaDeserialize(
 ) {
   final object = Meta(
     relId: reader.readString(offsets[0]),
-    value: reader.readLong(offsets[1]),
+    value: reader.readLongList(offsets[1]) ?? [],
   );
   return object;
 }
@@ -97,7 +103,7 @@ P _metaDeserializeProp<P>(
     case 0:
       return (reader.readString(offset)) as P;
     case 1:
-      return (reader.readString(offset)) as P;
+      return (reader.readLongList(offset) ?? []) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }

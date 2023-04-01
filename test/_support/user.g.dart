@@ -1563,8 +1563,22 @@ mixin $UserAdapter on Repository<User> {
   @override
   CollectionSchema<User> get schema => UserSchema;
 
+  static final Map<String, RelationshipMeta> _kUserRelationshipMetas = {
+    'hometown': RelationshipMeta<City>(
+      name: 'hometown',
+      type: 'City',
+      instance: (_) => (_ as User).hometown,
+    ),
+    'bucketList': RelationshipMeta<City>(
+      name: 'bucketList',
+      type: 'City',
+      instance: (_) => (_ as User).bucketList,
+    )
+  };
+
   @override
-  List<BelongsTo> Function(User) get relationships => (_) => [_.hometown];
+  Map<String, RelationshipMeta> get relationshipMetas =>
+      _kUserRelationshipMetas;
 }
 
 class UsersRepository = Repository<User> with $UserAdapter;

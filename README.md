@@ -99,3 +99,7 @@ Widget build(BuildContext context, WidgetRef ref) {
 ## license
 
 Public domain
+
+## examples
+
+show how much better than this: https://bloclibrary.dev/#/fluttertodostutorial

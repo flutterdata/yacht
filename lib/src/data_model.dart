@@ -13,16 +13,24 @@ abstract class DataModel<T extends DataModel<T>> {
     } else {
       _key = _fastHash(_uuid.v1().substring(0, 8));
     }
+  }
+
+  T init() {
     // init relationships
-    for (final rel in repository.relationships(this as T)) {
-      rel.init(this as T, 'hometown');
+
+    final metadatas = repository.relationshipMetas.values;
+    for (final metadata in metadatas) {
+      final relationship = metadata.instance(this);
+      relationship?._init(
+        owner: this,
+        name: metadata.name,
+        inverseName: metadata.inverseName,
+      );
     }
+    return this as T;
   }
 
   Id get yachtKey => _key;
-
-  // @protected
-  // set yachtKey(Id value) => _key = value;
 
   Object? get id;
 
@@ -38,10 +46,11 @@ abstract class DataModel<T extends DataModel<T>> {
       Yacht.repositories[_internalType] as Repository<T>;
 
   T? reload() {
-    return repository.collection.getSync(yachtKey);
+    return repository.collection.getSync(yachtKey)?.init();
   }
 
   T save() {
+    init();
     _isar.writeTxnSync(() {
       return repository.collection.putSync(this as T);
     });

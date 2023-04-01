@@ -27,8 +27,7 @@ abstract class _BaseAdapter<T extends DataModel<T>> {
       Yacht._isar.getCollectionByNameInternal(internalType)
           as IsarCollection<T>;
 
-  @protected
-  List<BelongsTo> Function(T) get relationships;
+  Map<String, RelationshipMeta> get relationshipMetas;
 }
 
 mixin _FinderAdapter<T extends DataModel<T>> on _BaseAdapter<T> {
@@ -39,10 +38,11 @@ mixin _FinderAdapter<T extends DataModel<T>> on _BaseAdapter<T> {
     if (where != null) {
       return where(super.collection.where()).build().findAllSync();
     }
-    return super.collection.where().findAllSync();
+    return super.collection.where().findAllSync().map((e) => e.init()).toList();
   }
 
-  T? findOne(Object id) => super.collection.queryById(id).findFirstSync();
+  T? findOne(Object id) =>
+      super.collection.queryById(id).findFirstSync()?.init();
 
   bool exists(Object id) => super.collection.queryById(id).isNotEmptySync();
 

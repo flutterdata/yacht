@@ -23,9 +23,6 @@ class Yacht {
     };
 
     _isar = await Isar.open(schemas, name: 'yacht', inspector: false);
-
-    // TODO tmp
-    _isar.writeTxnSync(() => _isar.collection<Meta>().clearSync());
   });
 
   static void clear() {
