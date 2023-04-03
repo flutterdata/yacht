@@ -25,7 +25,8 @@ class BelongsTo<T extends DataModel<T>> extends Relationship<T> {
 
   set value(T? newValue) {
     if (newValue != null) {
-      _saveMetaWith({newValue.save().yachtKey});
+      newValue.save();
+      _saveMetaWith({newValue.yachtKey});
     } else {
       _saveMetaWith({});
     }

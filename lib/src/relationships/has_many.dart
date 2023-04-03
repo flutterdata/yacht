@@ -11,6 +11,7 @@ class HasMany<T extends DataModel<T>> extends Relationship<T> {
   }
 
   add(T value) {
+    value.save();
     _saveMetaWith({..._keys, value.yachtKey});
   }
 

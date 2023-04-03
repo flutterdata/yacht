@@ -2,7 +2,15 @@ part of yacht;
 
 abstract class Relationship<T extends DataModel<T>> {
   String get _internalType => T.toString();
-  String get _relId => '${_owner!._internalType}:${_owner!.yachtKey}:$_name';
+  String get _relId {
+    if (_owner == null) {
+      throw UnsupportedError('''
+Model must be saved before assigning relationship.
+''');
+    }
+    return '${_owner!._internalType}:${_owner!.yachtKey}:$_name';
+  }
+
   final _metas = Yacht._isar.collection<Meta>();
 
   Set<int> _uninitializedKeys;

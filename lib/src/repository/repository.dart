@@ -38,11 +38,16 @@ mixin _FinderAdapter<T extends DataModel<T>> on _BaseAdapter<T> {
     if (where != null) {
       return where(super.collection.where()).build().findAllSync();
     }
-    return super.collection.where().findAllSync().map((e) => e.init()).toList();
+    return super
+        .collection
+        .where()
+        .findAllSync()
+        .map((e) => e._init())
+        .toList();
   }
 
   T? findOne(Object id) =>
-      super.collection.queryById(id).findFirstSync()?.init();
+      super.collection.queryById(id).findFirstSync()?._init();
 
   bool exists(Object id) => super.collection.queryById(id).isNotEmptySync();
 

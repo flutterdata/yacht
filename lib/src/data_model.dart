@@ -1,21 +1,20 @@
 part of yacht;
 
-abstract class DataModel<T extends DataModel<T>> {
+mixin DataModel<T extends DataModel<T>> {
   static final _uuid = uuid.Uuid();
 
-  static Id getKeyForId(Object id) => _fastHash(id.toString());
+  static Id _getKeyForId(Object? id) =>
+      _fastHash(id != null ? id.toString() : _uuid.v1().substring(0, 8));
 
-  late final Id _key;
+  Id? _key;
 
-  DataModel() {
-    if (id != null) {
-      _key = getKeyForId(id!);
-    } else {
-      _key = _fastHash(_uuid.v1().substring(0, 8));
+  T _init() {
+    if (_key != null) {
+      return this as T;
     }
-  }
 
-  T init() {
+    _key = _getKeyForId(id);
+
     // init relationships
 
     final metadatas = repository.relationshipMetas.values;
@@ -30,7 +29,10 @@ abstract class DataModel<T extends DataModel<T>> {
     return this as T;
   }
 
-  Id get yachtKey => _key;
+  Id get yachtKey {
+    _init();
+    return _key!;
+  }
 
   Object? get id;
 
@@ -46,11 +48,11 @@ abstract class DataModel<T extends DataModel<T>> {
       Yacht.repositories[_internalType] as Repository<T>;
 
   T? reload() {
-    return repository.collection.getSync(yachtKey)?.init();
+    return repository.collection.getSync(yachtKey)?._init();
   }
 
   T save() {
-    init();
+    _init();
     _isar.writeTxnSync(() {
       return repository.collection.putSync(this as T);
     });
