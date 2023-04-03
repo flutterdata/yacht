@@ -97,8 +97,7 @@ class _$UserCWProxyImpl implements _$UserCWProxy {
           // ignore: cast_nullable_to_non_nullable
           : job as Job?,
       priority: priority == const $CopyWithPlaceholder() || priority == null
-          // ignore: unnecessary_non_null_assertion
-          ? _value.priority!
+          ? _value.priority
           // ignore: cast_nullable_to_non_nullable
           : priority as Priority,
     );
@@ -112,15 +111,46 @@ extension $UserCopyWith on User {
 }
 
 // **************************************************************************
-// IsarCollectionGenerator
+// RepositoryGenerator
 // **************************************************************************
 
 // coverage:ignore-file
 // ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, prefer_const_constructors, lines_longer_than_80_chars, require_trailing_commas, inference_failure_on_function_invocation, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_checks, join_return_with_assignment, prefer_final_locals, avoid_js_rounded_ints, avoid_positional_boolean_parameters
 
-extension GetUserCollection on Isar {
-  IsarCollection<User> get users => this.collection();
+mixin $UserAdapter on Repository<User> {
+  @override
+  get schema => UserSchema;
+
+  static final Map<String, RelationshipMeta> _kUserRelationshipMetas = {
+    'hometown': RelationshipMeta<City>(
+      name: 'hometown',
+      type: 'City',
+      instance: (_) => (_ as User).hometown,
+    ),
+    'bucketList': RelationshipMeta<City>(
+      name: 'bucketList',
+      type: 'City',
+      instance: (_) => (_ as User).bucketList,
+    )
+  };
+
+  @override
+  Map<String, RelationshipMeta> get relationshipMetas =>
+      _kUserRelationshipMetas;
 }
+
+class UsersRepository = Repository<User> with $UserAdapter;
+
+//
+
+final usersRepositoryProvider =
+    Provider<Repository<User>>((ref) => UsersRepository(ref));
+
+extension ProviderContainerUserX on ProviderContainer {
+  Repository<User> get users => read(usersRepositoryProvider);
+}
+
+// isar
 
 const UserSchema = CollectionSchema(
   name: r'User',
@@ -999,8 +1029,6 @@ extension UserQueryObject on QueryBuilder<User, User, QFilterCondition> {
   }
 }
 
-extension UserQueryLinks on QueryBuilder<User, User, QFilterCondition> {}
-
 extension UserQuerySortBy on QueryBuilder<User, User, QSortBy> {
   QueryBuilder<User, User, QAfterSortBy> sortByAge() {
     return QueryBuilder.apply(this, (query) {
@@ -1168,50 +1196,6 @@ extension UserQueryWhereDistinct on QueryBuilder<User, User, QDistinct> {
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'priority', caseSensitive: caseSensitive);
-    });
-  }
-}
-
-extension UserQueryProperty on QueryBuilder<User, User, QQueryProperty> {
-  QueryBuilder<User, int, QQueryOperations> yachtKeyProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'yachtKey');
-    });
-  }
-
-  QueryBuilder<User, int?, QQueryOperations> ageProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'age');
-    });
-  }
-
-  QueryBuilder<User, DateTime?, QQueryOperations> dobProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'dob');
-    });
-  }
-
-  QueryBuilder<User, String?, QQueryOperations> nameProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'firstName');
-    });
-  }
-
-  QueryBuilder<User, String?, QQueryOperations> idProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'id');
-    });
-  }
-
-  QueryBuilder<User, Job?, QQueryOperations> jobProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'job');
-    });
-  }
-
-  QueryBuilder<User, Priority, QQueryOperations> priorityProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'priority');
     });
   }
 }
@@ -1552,42 +1536,3 @@ extension JobQueryFilter on QueryBuilder<Job, Job, QFilterCondition> {
 }
 
 extension JobQueryObject on QueryBuilder<Job, Job, QFilterCondition> {}
-
-// **************************************************************************
-// RepositoryGenerator
-// **************************************************************************
-
-// ignore_for_file: non_constant_identifier_names, duplicate_ignore
-
-mixin $UserAdapter on Repository<User> {
-  @override
-  CollectionSchema<User> get schema => UserSchema;
-
-  static final Map<String, RelationshipMeta> _kUserRelationshipMetas = {
-    'hometown': RelationshipMeta<City>(
-      name: 'hometown',
-      type: 'City',
-      instance: (_) => (_ as User).hometown,
-    ),
-    'bucketList': RelationshipMeta<City>(
-      name: 'bucketList',
-      type: 'City',
-      instance: (_) => (_ as User).bucketList,
-    )
-  };
-
-  @override
-  Map<String, RelationshipMeta> get relationshipMetas =>
-      _kUserRelationshipMetas;
-}
-
-class UsersRepository = Repository<User> with $UserAdapter;
-
-//
-
-final usersRepositoryProvider =
-    Provider<Repository<User>>((ref) => UsersRepository(ref));
-
-extension ProviderContainerUserX on ProviderContainer {
-  Repository<User> get users => read(usersRepositoryProvider);
-}

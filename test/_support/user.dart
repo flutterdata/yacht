@@ -1,17 +1,14 @@
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:equatable/equatable.dart';
-import 'package:isar/isar.dart';
 import 'package:yacht/yacht.dart';
 
 import 'city.dart';
 
 part 'user.g.dart';
 
-@Collection(
-    ignore: {'props', 'hashCode', 'stringify', 'hometown', 'bucketList'})
 @CopyWith()
 @DataRepository([])
-class User extends DataModel<User> with EquatableMixin {
+class User with DataModel<User>, EquatableMixin {
   @override
   final String? id;
 
@@ -42,6 +39,7 @@ class User extends DataModel<User> with EquatableMixin {
   }
 
   @override
+  @ignore
   List<Object?> get props => [id, name, age];
 }
 

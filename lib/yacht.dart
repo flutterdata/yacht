@@ -13,6 +13,7 @@ import 'package:riverpod/riverpod.dart';
 import 'package:uuid/uuid.dart' as uuid;
 
 // export external packages
+export 'package:isar/isar.dart';
 export 'package:riverpod/riverpod.dart' hide Family;
 
 part 'src/data_model.dart';

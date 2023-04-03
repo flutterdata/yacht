@@ -56,8 +56,7 @@ class _$CityCWProxyImpl implements _$CityCWProxy {
   }) {
     return City(
       id: id == const $CopyWithPlaceholder() || id == null
-          // ignore: unnecessary_non_null_assertion
-          ? _value.id!
+          ? _value.id
           // ignore: cast_nullable_to_non_nullable
           : id as String,
       name: name == const $CopyWithPlaceholder()
@@ -79,15 +78,36 @@ extension $CityCopyWith on City {
 }
 
 // **************************************************************************
-// IsarCollectionGenerator
+// RepositoryGenerator
 // **************************************************************************
 
 // coverage:ignore-file
 // ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, prefer_const_constructors, lines_longer_than_80_chars, require_trailing_commas, inference_failure_on_function_invocation, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_checks, join_return_with_assignment, prefer_final_locals, avoid_js_rounded_ints, avoid_positional_boolean_parameters
 
-extension GetCityCollection on Isar {
-  IsarCollection<City> get citys => this.collection();
+mixin $CityAdapter on Repository<City> {
+  @override
+  get schema => CitySchema;
+
+  static final Map<String, RelationshipMeta> _kCityRelationshipMetas = {};
+
+  @override
+  Map<String, RelationshipMeta> get relationshipMetas =>
+      _kCityRelationshipMetas;
 }
+
+class CitiesRepository = Repository<City>
+    with $CityAdapter, NothingSerializer<City>;
+
+//
+
+final citiesRepositoryProvider =
+    Provider<Repository<City>>((ref) => CitiesRepository(ref));
+
+extension ProviderContainerCityX on ProviderContainer {
+  Repository<City> get cities => read(citiesRepositoryProvider);
+}
+
+// isar
 
 const CitySchema = CollectionSchema(
   name: r'City',
@@ -721,8 +741,6 @@ extension CityQueryFilter on QueryBuilder<City, City, QFilterCondition> {
 
 extension CityQueryObject on QueryBuilder<City, City, QFilterCondition> {}
 
-extension CityQueryLinks on QueryBuilder<City, City, QFilterCondition> {}
-
 extension CityQuerySortBy on QueryBuilder<City, City, QSortBy> {
   QueryBuilder<City, City, QAfterSortBy> sortById() {
     return QueryBuilder.apply(this, (query) {
@@ -831,59 +849,4 @@ extension CityQueryWhereDistinct on QueryBuilder<City, City, QDistinct> {
       return query.addDistinctBy(r'population');
     });
   }
-}
-
-extension CityQueryProperty on QueryBuilder<City, City, QQueryProperty> {
-  QueryBuilder<City, int, QQueryOperations> yachtKeyProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'yachtKey');
-    });
-  }
-
-  QueryBuilder<City, String, QQueryOperations> idProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'id');
-    });
-  }
-
-  QueryBuilder<City, String?, QQueryOperations> nameProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'name');
-    });
-  }
-
-  QueryBuilder<City, int?, QQueryOperations> populationProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'population');
-    });
-  }
-}
-
-// **************************************************************************
-// RepositoryGenerator
-// **************************************************************************
-
-// ignore_for_file: non_constant_identifier_names, duplicate_ignore
-
-mixin $CityAdapter on Repository<City> {
-  @override
-  CollectionSchema<City> get schema => CitySchema;
-
-  static final Map<String, RelationshipMeta> _kCityRelationshipMetas = {};
-
-  @override
-  Map<String, RelationshipMeta> get relationshipMetas =>
-      _kCityRelationshipMetas;
-}
-
-class CitiesRepository = Repository<City>
-    with $CityAdapter, NothingSerializer<City>;
-
-//
-
-final citiesRepositoryProvider =
-    Provider<Repository<City>>((ref) => CitiesRepository(ref));
-
-extension ProviderContainerCityX on ProviderContainer {
-  Repository<City> get cities => read(citiesRepositoryProvider);
 }
